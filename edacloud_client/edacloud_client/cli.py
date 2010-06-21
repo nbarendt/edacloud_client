@@ -88,6 +88,8 @@ class EDACloudCLIClient(Cmd):
         self.client.add_project(args)
         self.stdout.write('\n')
 
+
+
 if __name__ == '__main__':
     cli = EDACloudCLIClient()
     cli.cmdloop()

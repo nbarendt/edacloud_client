@@ -29,8 +29,8 @@ class PopenCLITestCase(TestCase):
         self.assertIn(ECHO_LINE, stdoutdata, 'cmd.py failed to echo')
 
 class HttpTestServer(object):
-    def __init__(self, request_handler):
-        self.httpd_server = BaseHTTPServer.HTTPServer(('localhost', 0), request_handler)
+    def __init__(self):
+        self.httpd_server = BaseHTTPServer.HTTPServer(('localhost', 0), BaseHTTPServer.BaseHTTPRequestHandler)
         self.server_thread = Thread(target=self.httpd_server.serve_forever)
         self.server_thread.daemon = True
 
@@ -45,31 +45,32 @@ class HttpTestServer(object):
             self.httpd_server.shutdown()
             self.server_thread.join()
 
-class CLITestCase(TestCase):
-    def setUp(self):
+    def replace_request_handler_with(self, request_handler):
+        self.httpd_server.RequestHandlerClass = request_handler
+
+class CLIApplication(object):
+    def __init__(self, server):
         self.stdout_buffer = StringIO()
         self.cmd = EDACloudCLIClient(stdout=self.stdout_buffer)
-        self.httpd_server = None
+        self.cmd.server_hostname = server.get_server_address()[0]
+        self.cmd.server_portnumber = server.get_server_address()[1]
+
+    @property
+    def display(self):
+        return self.stdout_buffer.getvalue()
+
+    def issue_command(self, cmdline):
+        self.cmd.onecmd(cmdline)
+
+class CLITestCase(TestCase):
+    def setUp(self):
+        self.fake_server = HttpTestServer()
+        self.application = CLIApplication(self.fake_server)
+        self.fake_server.start()
 
     def tearDown(self):
-        self.cmd = None
-        self.stdout_buffer.close()
-        self.stdout_buffer = None
-        self.stop_http_test_server()
-
-    def start_http_test_server(self, req_handler):
-        self.httpd_server = HttpTestServer(req_handler)
-        self.cmd.server_hostname = self.httpd_server.get_server_address()[0]
-        self.cmd.server_portnumber = self.httpd_server.get_server_address()[1]
-        self.httpd_server.start()
-
-    def stop_http_test_server(self):
-        if self.httpd_server:
-            self.httpd_server.stop()
-
-    def test_WillEcho(self):
-        self.cmd.onecmd(TEST_ECHO_CMDLINE)
-        self.assertIn(ECHO_LINE + '\n', self.stdout_buffer.getvalue())
+        self.application = None
+        self.fake_server.stop()
 
     def test_WillGetTimeFromServer(self):
         EXPECTED_DATETIME_ISO_STRING = '2010-06-21T10:49:49.230427'
@@ -79,9 +80,9 @@ class CLITestCase(TestCase):
                 self.end_headers()
                 self.wfile.write(EXPECTED_DATETIME_ISO_STRING)
                 return
-        self.start_http_test_server(TestHandler)
-        self.cmd.onecmd(GET_TIME_CMDLINE)
-        self.assertEquals(EXPECTED_DATETIME_ISO_STRING + '\n', self.stdout_buffer.getvalue())
+        self.fake_server.replace_request_handler_with(TestHandler)
+        self.application.issue_command(GET_TIME_CMDLINE)
+        self.assertEquals(EXPECTED_DATETIME_ISO_STRING + '\n', self.application.display)
 
     def test_WillGetListOfProjectsFromServer(self):
         EXPECTED_PROJECT_LIST = []
@@ -91,9 +92,9 @@ class CLITestCase(TestCase):
                 self.end_headers()
                 self.wfile.write(json.dumps(EXPECTED_PROJECT_LIST))
                 return
-        self.start_http_test_server(TestHandler)
-        self.cmd.onecmd(GET_PROJECT_LIST_CMDLINE)
-        self.assertEquals(EXPECTED_PROJECT_LIST, json.loads(self.stdout_buffer.getvalue()))
+        self.fake_server.replace_request_handler_with(TestHandler)
+        self.application.issue_command(GET_PROJECT_LIST_CMDLINE)
+        self.assertEquals(EXPECTED_PROJECT_LIST, json.loads(self.application.display))
         
     def test_WillAddProjectToServer(self):
         PROJECT_FILESYSTEM_PATH = 'c:\project_dir'
@@ -118,15 +119,15 @@ class CLITestCase(TestCase):
                 self.wfile.write(json.dumps(project_list[0]))
                 return
 
-        self.start_http_test_server(TestHandler)
-        self.cmd.onecmd(ADD_PROJECT_LIST_CMDLINE)
-        self.assertEquals('\n', self.stdout_buffer.getvalue())
-        self.cmd.onecmd(GET_PROJECT_LIST_CMDLINE)
-        self.assertEquals(1, len(json.loads(self.stdout_buffer.getvalue())))
-        self.assertIn('path', json.loads(self.stdout_buffer.getvalue())[0])
-        self.assertIsNotNone(json.loads(self.stdout_buffer.getvalue())[0]['path'])
-        self.assertIn('href', json.loads(self.stdout_buffer.getvalue())[0])
-        self.assertIsNotNone(json.loads(self.stdout_buffer.getvalue())[0]['href'])
+        self.fake_server.replace_request_handler_with(TestHandler)
+        self.application.issue_command(ADD_PROJECT_LIST_CMDLINE)
+        self.assertEquals('\n', self.application.display)
+        self.application.issue_command(GET_PROJECT_LIST_CMDLINE)
+        self.assertEquals(1, len(json.loads(self.application.display)))
+        self.assertIn('path', json.loads(self.application.display)[0])
+        self.assertIsNotNone(json.loads(self.application.display)[0]['path'])
+        self.assertIn('href', json.loads(self.application.display)[0])
+        self.assertIsNotNone(json.loads(self.application.display)[0]['href'])
 
         
                          
