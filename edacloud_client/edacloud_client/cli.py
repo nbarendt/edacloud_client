@@ -57,10 +57,13 @@ class EDACloudCLIClient(Cmd):
 
     def __init__(self, completekey='tab', stdin=None, stdout=None):
         Cmd.__init__(self, completekey, stdin, stdout)
+        self._client = None
 
     @property
     def client(self):
-        return Client(self.server_hostname, self.server_portnumber, self.username)
+        if not self._client:
+            self._client = Client(self.server_hostname, self.server_portnumber, self.username)
+        return self._client
 
     def do_quit(self, args):
         self.stdout.write('bye!\n')
