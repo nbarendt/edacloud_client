@@ -75,13 +75,21 @@ class EDACloudCLI(Cmd):
     def do_projects(self, args):
         self.stdout.write('Projects:\n')
         for proj in self.client.get_project_list():
-            self.stdout.write(proj['path'])
+            self.stdout.write(':'.join([proj['id'], proj['path']]))
+            self.stdout.write('\n')
         self.stdout.write('\n')
 
     def do_add(self, args):
         self.client.add_project(args)
         self.stdout.write('\n')
 
+    def do_build(self, args):
+        try:
+            self.client.build_project(args)
+            self.stdout.write('\n')
+        except Exception, e:
+            if e.message == 'Unknown Project ID':
+                self.stdout.write('Error Building Project: %s %s\n' % (e.message, e.project_id))
 
 
 if __name__ == '__main__':
