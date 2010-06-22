@@ -1,6 +1,5 @@
 from unittest2 import TestCase
 from subprocess import Popen, PIPE, STDOUT
-from time import sleep
 import os
 from StringIO import StringIO
 from edacloud_client.cli import EDACloudCLIClient
