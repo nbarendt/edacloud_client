@@ -20,7 +20,7 @@ ECHO_LINE = 'Hello!'
 TEST_ECHO_CMDLINE = '{0} {1}'.format(ECHO_CMD, ECHO_LINE)
 
 class PopenCLITestCase(TestCase):
-    def test_WillEcho(self):
+    def _test_WillEcho(self):
         cmdline = [python_exe, os.path.join(MODULE_NAME, CLI_NAME)]
         proc = Popen(cmdline, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
         stdoutdata, stderrdata = proc.communicate('\n'.join([TEST_ECHO_CMDLINE , QUIT_CMD]))

@@ -31,10 +31,6 @@ class Client(object):
         self.server_portnumber = portnumber
         self.username = username
 
-    def get_root(self, path):
-        url = 'http://{0}:{1}/{2}'.format(self.server_hostname, self.server_portnumber, path)
-        return make_request('GET', url)
-
     def get_user(self, path):
         url = 'http://{0}:{1}/{2}/{3}'.format(self.server_hostname, self.server_portnumber, self.username, path)
         return make_request('GET', url)
@@ -65,9 +61,6 @@ class EDACloudCLIClient(Cmd):
     @property
     def client(self):
         return Client(self.server_hostname, self.server_portnumber, self.username)
-
-    def do_echo(self, args):
-        self.stdout.write(args + '\n')
 
     def do_quit(self, args):
         self.stdout.write('bye!\n')
