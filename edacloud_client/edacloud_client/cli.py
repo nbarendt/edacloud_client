@@ -43,9 +43,6 @@ class Client(object):
         url = 'http://{0}:{1}/{2}/{3}'.format(self.server_hostname, self.server_portnumber, self.username, path)
         return make_request('POST', url, json.dumps(data))
 
-    def get_datetime(self):
-        return self.get_root('datetime').read()
-
     def get_project_list(self):
         try:
             return json.loads(self.get_user('projects').read())
@@ -78,10 +75,6 @@ class EDACloudCLIClient(Cmd):
 
     def do_EOF(self, args):
         return self.do_quit(args)
-
-    def do_datetime(self, args):
-        self.stdout.write(self.client.get_datetime())
-        self.stdout.write('\n')
 
     def do_projects(self, args):
         self.stdout.write('Projects:\n')

@@ -64,6 +64,7 @@ class CLIApplication(object):
 
     def shows(self, expected):
         assert expected in self.display, 'Failed to find "%s" in "%s"' % (expected, self.display)
+        return self
 
     def get_datetime(self):
         self.issue_command('datetime')
@@ -86,17 +87,6 @@ class CLITestCase(TestCase):
     def tearDown(self):
         self.application = None
         self.fake_server.stop()
-
-    def test_WillGetTimeFromServer(self):
-        EXPECTED_DATETIME_ISO_STRING = '2010-06-21T10:49:49.230427'
-        class TestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-            def do_GET(self):
-                self.send_response(200)
-                self.end_headers()
-                self.wfile.write(EXPECTED_DATETIME_ISO_STRING)
-                return
-        self.fake_server.replace_request_handler_with(TestHandler)
-        self.application.get_datetime().shows(EXPECTED_DATETIME_ISO_STRING + '\n')
 
     def test_WillGetListOfProjectsFromServer(self):
         class TestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
