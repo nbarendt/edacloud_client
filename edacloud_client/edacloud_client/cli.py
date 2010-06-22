@@ -47,7 +47,10 @@ class Client(object):
         return self.get_root('datetime').read()
 
     def get_project_list(self):
-        return self.get_user('projects').read()
+        try:
+            return json.loads(self.get_user('projects').read())
+        except ValueError:
+            return []
 
     def add_project(self, project_path):
         self.post_user_json('projects', dict(path=project_path.strip())).read()
@@ -81,7 +84,9 @@ class EDACloudCLIClient(Cmd):
         self.stdout.write('\n')
 
     def do_projects(self, args):
-        self.stdout.write(self.client.get_datetime())
+        self.stdout.write('Projects:\n')
+        for proj in self.client.get_project_list():
+            self.stdout.write(proj['path'])
         self.stdout.write('\n')
 
     def do_add(self, args):

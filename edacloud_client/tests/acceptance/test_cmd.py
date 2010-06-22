@@ -18,8 +18,6 @@ QUIT_CMD = 'quit'
 
 ECHO_LINE = 'Hello!'
 TEST_ECHO_CMDLINE = '{0} {1}'.format(ECHO_CMD, ECHO_LINE)
-GET_PROJECT_LIST_CMDLINE = 'projects'
-GET_TIME_CMDLINE = 'datetime'
 
 class PopenCLITestCase(TestCase):
     def test_WillEcho(self):
@@ -44,6 +42,7 @@ class HttpTestServer(object):
         if self.server_thread.isAlive():
             self.httpd_server.shutdown()
             self.server_thread.join()
+            self.server_thread = None
 
     def replace_request_handler_with(self, request_handler):
         self.httpd_server.RequestHandlerClass = request_handler
@@ -61,6 +60,22 @@ class CLIApplication(object):
 
     def issue_command(self, cmdline):
         self.cmd.onecmd(cmdline)
+        return self
+
+    def shows(self, expected):
+        assert expected in self.display, 'Failed to find "%s" in "%s"' % (expected, self.display)
+
+    def get_datetime(self):
+        self.issue_command('datetime')
+        return self
+
+    def get_project_list(self):
+        self.issue_command('projects')
+        return self
+    
+    def add_project(self, project_path):
+        self.issue_command('add {0}'.format(project_path))
+        return self
 
 class CLITestCase(TestCase):
     def setUp(self):
@@ -81,24 +96,20 @@ class CLITestCase(TestCase):
                 self.wfile.write(EXPECTED_DATETIME_ISO_STRING)
                 return
         self.fake_server.replace_request_handler_with(TestHandler)
-        self.application.issue_command(GET_TIME_CMDLINE)
-        self.assertEquals(EXPECTED_DATETIME_ISO_STRING + '\n', self.application.display)
+        self.application.get_datetime().shows(EXPECTED_DATETIME_ISO_STRING + '\n')
 
     def test_WillGetListOfProjectsFromServer(self):
-        EXPECTED_PROJECT_LIST = []
         class TestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             def do_GET(self):
                 self.send_response(200)
                 self.end_headers()
-                self.wfile.write(json.dumps(EXPECTED_PROJECT_LIST))
+                self.wfile.write(json.dumps([]))
                 return
         self.fake_server.replace_request_handler_with(TestHandler)
-        self.application.issue_command(GET_PROJECT_LIST_CMDLINE)
-        self.assertEquals(EXPECTED_PROJECT_LIST, json.loads(self.application.display))
+        self.application.get_project_list().shows('Projects:\n\n')
         
     def test_WillAddProjectToServer(self):
-        PROJECT_FILESYSTEM_PATH = 'c:\project_dir'
-        ADD_PROJECT_LIST_CMDLINE = 'add {0}'.format(PROJECT_FILESYSTEM_PATH)
+        PROJECT_FILESYSTEM_PATH = 'c:\quidgyboo'
         project_list = []
         class TestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             def do_GET(self):
@@ -120,14 +131,9 @@ class CLITestCase(TestCase):
                 return
 
         self.fake_server.replace_request_handler_with(TestHandler)
-        self.application.issue_command(ADD_PROJECT_LIST_CMDLINE)
-        self.assertEquals('\n', self.application.display)
-        self.application.issue_command(GET_PROJECT_LIST_CMDLINE)
-        self.assertEquals(1, len(json.loads(self.application.display)))
-        self.assertIn('path', json.loads(self.application.display)[0])
-        self.assertIsNotNone(json.loads(self.application.display)[0]['path'])
-        self.assertIn('href', json.loads(self.application.display)[0])
-        self.assertIsNotNone(json.loads(self.application.display)[0]['href'])
+        self.application.add_project(PROJECT_FILESYSTEM_PATH).shows('\n')
+        self.application.get_project_list().shows('Projects:\n{0}\n'.format(PROJECT_FILESYSTEM_PATH))
+
 
         
                          
