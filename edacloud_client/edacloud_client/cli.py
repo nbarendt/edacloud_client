@@ -55,14 +55,15 @@ class EDACloudCLIClient(Cmd):
     server_portnumber = 8080
     username = 'default'
 
-    def __init__(self, completekey='tab', stdin=None, stdout=None):
+    def __init__(self, completekey='tab', stdin=None, stdout=None, client_class=None):
         Cmd.__init__(self, completekey, stdin, stdout)
+        self.client_class = client_class if client_class else Client
         self._client = None
 
     @property
     def client(self):
         if not self._client:
-            self._client = Client(self.server_hostname, self.server_portnumber, self.username)
+            self._client = self.client_class(self.server_hostname, self.server_portnumber, self.username)
         return self._client
 
     def do_quit(self, args):
