@@ -25,7 +25,7 @@ def make_request(method, url, data=''):
                 method, url, result.status, result.read()))
     return result
 
-class Client(object):
+class EDACloudClient(object):
     def __init__(self, hostname, portnumber, username):
         self.server_hostname = hostname
         self.server_portnumber = portnumber
@@ -49,21 +49,20 @@ class Client(object):
         self.post_user_json('projects', dict(path=project_path.strip())).read()
         return
 
-class EDACloudCLIClient(Cmd):
+class EDACloudCLI(Cmd):
     prompt = 'edacloud> '
     server_hostname = 'localhost'
     server_portnumber = 8080
     username = 'default'
 
-    def __init__(self, completekey='tab', stdin=None, stdout=None, client_class=None):
+    def __init__(self, completekey='tab', stdin=None, stdout=None):
         Cmd.__init__(self, completekey, stdin, stdout)
-        self.client_class = client_class if client_class else Client
         self._client = None
 
     @property
     def client(self):
         if not self._client:
-            self._client = self.client_class(self.server_hostname, self.server_portnumber, self.username)
+            self._client = EDACloudClient(self.server_hostname, self.server_portnumber, self.username)
         return self._client
 
     def do_quit(self, args):

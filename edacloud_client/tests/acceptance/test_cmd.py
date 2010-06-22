@@ -2,7 +2,7 @@ from unittest2 import TestCase
 from subprocess import Popen, PIPE, STDOUT
 import os
 from StringIO import StringIO
-from edacloud_client.cli import EDACloudCLIClient
+from edacloud_client.cli import EDACloudCLI
 import BaseHTTPServer
 from threading import Thread
 import json
@@ -49,7 +49,7 @@ class HttpTestServer(object):
 class CLIApplication(object):
     def __init__(self, server):
         self.stdout_buffer = StringIO()
-        self.cmd = EDACloudCLIClient(stdout=self.stdout_buffer)
+        self.cmd = EDACloudCLI(stdout=self.stdout_buffer)
         self.cmd.server_hostname = server.get_server_address()[0]
         self.cmd.server_portnumber = server.get_server_address()[1]
 
