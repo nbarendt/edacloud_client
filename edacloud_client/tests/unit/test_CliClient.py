@@ -8,7 +8,10 @@ class CLIApplication(object):
     def __init__(self):
         self.stdout_buffer = StringIO()
         self.async_buffer = StringIO()
-        self.cmd = edacloud_client.cli.EDACloudCLI(stdout=self.stdout_buffer, asyncout=self.async_buffer)
+        self.cmd = edacloud_client.cli.EDACloudCLI(stdout=self.stdout_buffer,
+                                                   asyncout=self.async_buffer,
+                                                   client_class=Mock())
+        self.mock_client = self.cmd.client
 
     @property
     def display(self):
@@ -43,60 +46,65 @@ class CLIApplication(object):
         return self
 
     def force_async_build_event_status(self, project, build, status):
-        self.cmd
+        self.mock_client.build_event_status_handler(project, build, status)
 
+    def client(self, attr):
+        return ClientFunctionMock(getattr(self.mock_client, attr))
+
+class ClientFunctionMock(object):
+    def __init__(self, func):
+        self.func = func
+
+    def returns(self, value):
+        setattr(self.func, 'return_value', value)
+
+    def has_side_effect(self, value):
+        setattr(self.func, 'side_effect', value)
+
+    def was_called_with(self, expected):
+        actual = getattr(self.func, 'call_args_list')
+        assert expected == actual 
+    
 class CLITestCase(TestCase):
-    @patch('edacloud_client.cli.EDACloudClient', spec=['get_project_list'])
-    def test_ClientWillReturnEmptyProjectList(self, MockClient):
-        application = CLIApplication()
-        MockClient().get_project_list.return_value = []
-        application.get_project_list().shows('Projects:\n\n')
+    def setUp(self):
+        self.application = CLIApplication()
 
-    @patch('edacloud_client.cli.EDACloudClient', spec=['get_project_list'])
-    def test_ClientWillReturnEmptyProjectList(self, MockClient):
-        application = CLIApplication()
-        MockClient().get_project_list.return_value = []
-        application.get_project_list().shows('Projects:\n\n')
+    def tearDown(self):
+        self.application = None
 
-    @patch('edacloud_client.cli.EDACloudClient', spec=['get_project_list'])
-    def test_ClientWillReturnNonEmptyProjectList(self, MockClient):
-        application = CLIApplication()
-        MockClient().get_project_list.return_value = [ {'path': 'a', 'id': '12'},
-                                                       {'path': 'b', 'id': '34'},
-                                                       {'path': 'c', 'id': '56'}
-                                                       ]
-        application.get_project_list().shows('Projects:\n12:a\n34:b\n56:c\n')
+    def test_ClientWillReturnEmptyProjectList(self):
+        self.application.client('get_project_list').returns([])
+        self.application.get_project_list().shows('Projects:\n\n')
 
-    @patch('edacloud_client.cli.EDACloudClient', spec=['add_project'])
-    def test_ClientWillAddProject(self, MockClient):
-        application = CLIApplication()
+    def test_ClientWillReturnNonEmptyProjectList(self):
+        self.application.client('get_project_list').returns( [ {'path': 'a', 'id': '12'},
+                                                               {'path': 'b', 'id': '34'},
+                                                               {'path': 'c', 'id': '56'}
+                                                               ])
+        self.application.get_project_list().shows('Projects:\n12:a\n34:b\n56:c\n')
+
+    def test_ClientWillAddProject(self):
         PROJECT_FILESYSTEM_PATH = 'c:\quidgyboo'
-        application.add_project(PROJECT_FILESYSTEM_PATH).shows('\n')
-        self.assertListEqual(MockClient().add_project.call_args_list, [((PROJECT_FILESYSTEM_PATH,), {} )])
+        self.application.add_project(PROJECT_FILESYSTEM_PATH).shows('\n')
+        self.application.client('add_project').was_called_with([((PROJECT_FILESYSTEM_PATH,), {} )])
 
-    @patch('edacloud_client.cli.EDACloudClient', spec=['build_project'])
-    def test_ClientWillBuildProject(self, MockClient):
+    def test_ClientWillBuildProject(self):
         PROJECT_ID = 'abcdefg'
-        application = CLIApplication()
-        application.build_project(PROJECT_ID).shows('\n')
-        self.assertListEqual(MockClient().build_project.call_args_list, [((PROJECT_ID,), {} )])
+        self.application.build_project(PROJECT_ID).shows('\n')
+        self.application.client('build_project').was_called_with([((PROJECT_ID,), {} )])
 
-    @patch('edacloud_client.cli.EDACloudClient', spec=['build_project'])
-    def test_ClientWillErrorOnInvalidProjectID(self, MockClient):
+    def test_ClientWillErrorOnInvalidProjectID(self):
         PROJECT_ID = 'abcdefg'
         exc = Exception('Unknown Project ID')
         exc.project_id = PROJECT_ID
-        application = CLIApplication()
-        MockClient().build_project.side_effect = exc
-        application.build_project(PROJECT_ID).shows(
+        self.application.client('build_project').has_side_effect(exc)
+        self.application.build_project(PROJECT_ID).shows(
             'Error Building Project: Unknown Project ID %s\n' % PROJECT_ID)
 
-    @patch('edacloud_client.cli.EDACloudClient')
-    def test_ClientWillRegisterBuildStatusHandler(self, MockClient):
-        self.assertIsNotNone(MockClient().build_event_status_handler)
+    def test_ClientWillRegisterBuildStatusHandler(self):
+        self.assertIsNotNone(self.application.mock_client.build_event_status_handler)
 
-    @patch('edacloud_client.cli.EDACloudClient')
-    def test_ClientWillReportAsyncBuildStatusEvent(self, MockClient):
+    def test_ClientWillReportAsyncBuildStatusEvent(self):
         #started_date_time = datetime.now().isoformat()
         #self.applicaiton.async_shows('Build Status: Complete for build started at 
         pass
