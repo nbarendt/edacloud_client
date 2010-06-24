@@ -95,9 +95,8 @@ class CLITestCase(TestCase):
 
     def test_ClientWillErrorOnInvalidProjectID(self):
         PROJECT_ID = 'abcdefg'
-        exc = Exception('Unknown Project ID')
-        exc.project_id = PROJECT_ID
-        self.application.client('build_project').has_side_effect(exc)
+        self.application.client('build_project').has_side_effect(edacloud_client.cli.BuildException(
+            'Unknown Project ID', PROJECT_ID))
         self.application.build_project(PROJECT_ID).shows(
             'Error Building Project: Unknown Project ID %s\n' % PROJECT_ID)
 

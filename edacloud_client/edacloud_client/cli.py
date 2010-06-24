@@ -50,6 +50,10 @@ class EDACloudClient(object):
         self.post_user_json('projects', dict(path=project_path.strip())).read()
         return
 
+class BuildException(Exception):
+    def __init__(self, details, project_id):
+        self.details = details
+        self.project_id = project_id
 
 class EDACloudCLI(Cmd):
     prompt = 'edacloud> '
@@ -93,9 +97,8 @@ class EDACloudCLI(Cmd):
         try:
             self.client.build_project(args)
             self.stdout.write('\n')
-        except Exception, e:
-            if e.message == 'Unknown Project ID':
-                self.stdout.write('Error Building Project: %s %s\n' % (e.message, e.project_id))
+        except BuildException, e:
+                self.stdout.write('Error Building Project: %s %s\n' % (e.details, e.project_id))
 
 
 if __name__ == '__main__':
