@@ -45,6 +45,10 @@ class CLIApplication(object):
         self.issue_command('build {0}'.format(project_id))
         return self
 
+    def get_build_results(self, build_id, results_dir):
+        self.issue_command('get {0} {1}'.format(build_id, results_dir))
+        return self
+    
     def force_async_build_event_status(self, project, build, status):
         self.mock_client.build_event_status_handler(project, build, status)
 
@@ -104,6 +108,17 @@ class CLITestCase(TestCase):
         self.assertIsNotNone(self.application.mock_client.build_event_status_handler)
 
     def test_ClientWillReportAsyncBuildStatusEvent(self):
-        #started_date_time = datetime.now().isoformat()
-        #self.applicaiton.async_shows('Build Status: Complete for build started at 
-        pass
+        started_date_time = datetime.now().isoformat()
+        project = dict()
+        build = dict(started=started_date_time)
+        status = dict(message='Complete')
+        self.application.force_async_build_event_status(project, build, status)
+        self.application.async_shows('Build Status: Complete for build started at {0}'.format(started_date_time))
+
+    def test_ClientWillDownloadBuildResults(self):
+        BUILD_ID = 'abcdefg'
+        DOWNLOAD_DIR = 'c:\quidgybo\download_build'
+        self.application.client('get_build_results').returns(DOWNLOAD_DIR)
+        self.application.get_build_results(BUILD_ID, DOWNLOAD_DIR).shows(
+            'Build {0} results available in {1}'.format(BUILD_ID, DOWNLOAD_DIR))
+        self.application.client('get_build_results').was_called_with([ ((BUILD_ID, DOWNLOAD_DIR), {} )])

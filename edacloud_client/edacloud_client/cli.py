@@ -73,7 +73,7 @@ class EDACloudCLI(Cmd):
    
     def async_build_event_status_handler(self, project, build, status):
         self.asyncout.write('Build Status: {status[message]} for build started at {build[started]}'.format(
-                project, build, status))
+                project=project, build=build, status=status))
 
     def do_quit(self, args):
         self.stdout.write('bye!\n')
@@ -100,7 +100,14 @@ class EDACloudCLI(Cmd):
         except BuildException, e:
                 self.stdout.write('Error Building Project: %s %s\n' % (e.details, e.project_id))
 
-
+    def do_get(self, args):
+        args_list = args.split()
+        build_id = args_list[0]
+        target_dir = args_list[1]
+        results = self.client.get_build_results(build_id, target_dir)
+        self.stdout.write('Build {0} results available in {1}'.format(build_id,
+                                                                      results))
+        
 if __name__ == '__main__':
     cli = EDACloudCLIClient()
     cli.cmdloop()
