@@ -105,8 +105,7 @@ class EDACloudCLI(Cmd):
         build_id = args_list[0]
         target_dir = args_list[1]
         results = self.client.get_build_results(build_id, target_dir)
-        self.stdout.write('Build {0} results available in {1}'.format(build_id,
-                                                                      results))
+        self.stdout.write('Build {0} results available in {1}'.format(build_id, results))
         
 if __name__ == '__main__':
     cli = EDACloudCLIClient()
