@@ -10,9 +10,6 @@ class BuildException(Exception):
 
 class EDACloudCLI(Cmd):
     prompt = 'edacloud> '
-    server_hostname = 'localhost'
-    server_portnumber = 8080
-    username = 'nobody'
 
     def __init__(self, completekey='tab', stdin=None, stdout=None, asyncout=None, client_class=None):
         Cmd.__init__(self, completekey, stdin, stdout)
@@ -20,7 +17,7 @@ class EDACloudCLI(Cmd):
         self.client =  self.make_client()
 
     def make_client(self):
-        client = EDACloudClient(self.server_hostname, self.server_portnumber, self.username)
+        client = EDACloudClient()
         client.build_event_status_handler = self.async_build_event_status_handler
         return client
    

@@ -1,8 +1,10 @@
-
+class EDACloudService(object):
+    def __init__(self):
+        pass
 
 class EDACloudClient(object):
-    def __init__(self, hostname, portnumber, username):
-        pass
+    def __init__(self):
+        self.service = EDACloudService()
 
     def get_project_list(self):
         pass
