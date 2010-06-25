@@ -90,14 +90,10 @@ class CLITestCase(TestCase):
         self.application.get_project_list().shows('Projects:\n12:a\n34:b\n56:c\n')
 
     def test_CLIWillAddProject(self):
-        PROJECT_FILESYSTEM_PATH = 'c:\quidgyboo'
-        self.application.add_project(PROJECT_FILESYSTEM_PATH).shows('\n')
-        self.application.client('add_project').was_called_with([((PROJECT_FILESYSTEM_PATH,), {} )])
+        self.application.add_project('c:\quidgyboo').shows('\n')
 
     def test_CLIWillBuildProject(self):
-        PROJECT_ID = 'abcdefg'
-        self.application.build_project(PROJECT_ID).shows('\n')
-        self.application.client('build_project').was_called_with([((PROJECT_ID,), {} )])
+        self.application.build_project('abcdefg').shows('\n')
 
     def test_CLIWillErrorOnInvalidProjectID(self):
         PROJECT_ID = 'abcdefg'
