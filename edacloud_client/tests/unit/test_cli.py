@@ -1,6 +1,7 @@
 from unittest2 import TestCase
 from mock import Mock, patch
 import edacloud_client.cli
+import edacloud_client.client
 from StringIO import StringIO
 from datetime import datetime
 
@@ -10,7 +11,7 @@ class CLIApplication(object):
         self.async_buffer = StringIO()
         self.cmd = edacloud_client.cli.EDACloudCLI(stdout=self.stdout_buffer,
                                                    asyncout=self.async_buffer,
-                                                   client_class=Mock())
+                                                   client_class=Mock(spec=edacloud_client.client.EDACloudClient))
         self.mock_client = self.cmd.client
 
     @property
