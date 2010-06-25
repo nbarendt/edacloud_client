@@ -35,7 +35,7 @@ class EDACloudCLI(Cmd):
     def do_projects(self, args):
         self.stdout.write('Projects:\n')
         for proj in self.client.get_project_list():
-            self.stdout.write(':'.join([proj['id'], proj['path']]))
+            self.stdout.write(':'.join([proj.id, proj.path]))
             self.stdout.write('\n')
         self.stdout.write('\n')
 

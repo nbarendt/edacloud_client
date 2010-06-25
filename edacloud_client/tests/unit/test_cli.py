@@ -83,11 +83,13 @@ class CLITestCase(TestCase):
         self.application.get_project_list().shows('Projects:\n\n')
 
     def test_CLIWillReturnNonEmptyProjectList(self):
-        self.application.client('get_project_list').will_return( [ {'path': 'a', 'id': '12'},
-                                                               {'path': 'b', 'id': '34'},
-                                                               {'path': 'c', 'id': '56'}
-                                                               ])
-        self.application.get_project_list().shows('Projects:\n12:a\n34:b\n56:c\n')
+        projects_list = [Mock(), Mock()]
+        projects_list[0].path = 'a'
+        projects_list[0].id = '12'
+        projects_list[1].path = 'b'
+        projects_list[1].id = '34'
+        self.application.client('get_project_list').will_return( projects_list)
+        self.application.get_project_list().shows('Projects:\n12:a\n34:b\n')
 
     def test_CLIWillAddProject(self):
         self.application.add_project('c:\quidgyboo').shows('\n')
