@@ -78,38 +78,38 @@ class CLITestCase(TestCase):
         self.application = None
         edacloud_client.cli.EDACloudClient = self.original
 
-    def test_ClientWillReturnEmptyProjectList(self):
+    def test_CLIWillReturnEmptyProjectList(self):
         self.application.client('get_project_list').will_return([])
         self.application.get_project_list().shows('Projects:\n\n')
 
-    def test_ClientWillReturnNonEmptyProjectList(self):
+    def test_CLIWillReturnNonEmptyProjectList(self):
         self.application.client('get_project_list').will_return( [ {'path': 'a', 'id': '12'},
                                                                {'path': 'b', 'id': '34'},
                                                                {'path': 'c', 'id': '56'}
                                                                ])
         self.application.get_project_list().shows('Projects:\n12:a\n34:b\n56:c\n')
 
-    def test_ClientWillAddProject(self):
+    def test_CLIWillAddProject(self):
         PROJECT_FILESYSTEM_PATH = 'c:\quidgyboo'
         self.application.add_project(PROJECT_FILESYSTEM_PATH).shows('\n')
         self.application.client('add_project').was_called_with([((PROJECT_FILESYSTEM_PATH,), {} )])
 
-    def test_ClientWillBuildProject(self):
+    def test_CLIWillBuildProject(self):
         PROJECT_ID = 'abcdefg'
         self.application.build_project(PROJECT_ID).shows('\n')
         self.application.client('build_project').was_called_with([((PROJECT_ID,), {} )])
 
-    def test_ClientWillErrorOnInvalidProjectID(self):
+    def test_CLIWillErrorOnInvalidProjectID(self):
         PROJECT_ID = 'abcdefg'
         self.application.client('build_project').will_cause_side_effect(edacloud_client.cli.BuildException(
             'Unknown Project ID', PROJECT_ID))
         self.application.build_project(PROJECT_ID).shows(
             'Error Building Project: Unknown Project ID %s\n' % PROJECT_ID)
 
-    def test_ClientWillRegisterBuildStatusHandler(self):
+    def test_CLIWillRegisterBuildStatusHandler(self):
         self.assertIsNotNone(self.application.mock_client.build_event_status_handler)
 
-    def test_ClientWillReportAsyncBuildStatusEvent(self):
+    def test_CLIWillReportAsyncBuildStatusEvent(self):
         started_date_time = datetime.now().isoformat()
         project = dict()
         build = dict(started=started_date_time)
@@ -117,20 +117,20 @@ class CLITestCase(TestCase):
         self.application.force_async_build_event_status(project, build, status)
         self.application.async_shows('Build Status: Complete for build started at {0}\n'.format(started_date_time))
 
-    def test_ClientWillDownloadBuildResults(self):
+    def test_CLIWillDownloadBuildResults(self):
         BUILD_ID = 'abcdefg'
         DOWNLOAD_DIR = 'c:\quidgybo\download_build'
         self.application.client('get_build_results').will_return(DOWNLOAD_DIR)
         self.application.get_build_results(BUILD_ID, DOWNLOAD_DIR).shows(
             'Build {0} results available in {1}\n'.format(BUILD_ID, DOWNLOAD_DIR))
 
-    def test_ClientErrorOnBuildIDWithEmbeddedSpaces(self):
+    def test_CLIErrorOnBuildIDWithEmbeddedSpaces(self):
         BUILD_ID = 'abcd efg'
         DOWNLOAD_DIR = 'c:\quidgybo\download_build'
         self.application.get_build_results(BUILD_ID, DOWNLOAD_DIR).shows(
             'Error parsing "get {0} {1}"\n'.format(BUILD_ID, DOWNLOAD_DIR))
 
-    def test_ClientErrorOnDownloadDirWithEmbeddedSpaces(self):
+    def test_CLIErrorOnDownloadDirWithEmbeddedSpaces(self):
         BUILD_ID = 'abcdefg'
         DOWNLOAD_DIR = 'c:\qui dgybo\download_build'
         self.application.get_build_results(BUILD_ID, DOWNLOAD_DIR).shows(
