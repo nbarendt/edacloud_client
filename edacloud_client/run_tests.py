@@ -16,4 +16,4 @@ if __name__ == '__main__':
     cov.start()
     unittest.TextTestRunner(verbosity=2).run(suite)
     cov.stop()
-    cov.report(omit_prefixes=[site_packages_path])
+    #cov.report(omit_prefixes=[site_packages_path])

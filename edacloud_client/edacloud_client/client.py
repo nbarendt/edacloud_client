@@ -25,6 +25,7 @@ def make_request(method, url, data=''):
 
 class EDACloudClient(object):
     def __init__(self, hostname, portnumber, username):
+        raise Exception('SHOULD BE MOCKED!')
         self.server_hostname = hostname
         self.server_portnumber = portnumber
         self.username = username
@@ -47,4 +48,10 @@ class EDACloudClient(object):
     def add_project(self, project_path):
         self.post_user_json('projects', dict(path=project_path.strip())).read()
         return
+
+    def build_project(self, project_id):
+        pass
+
+    def get_build_results(self, build_id):
+        pass
 

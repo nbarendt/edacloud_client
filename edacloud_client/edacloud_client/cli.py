@@ -17,10 +17,10 @@ class EDACloudCLI(Cmd):
     def __init__(self, completekey='tab', stdin=None, stdout=None, asyncout=None, client_class=None):
         Cmd.__init__(self, completekey, stdin, stdout)
         self.asyncout = asyncout if asyncout else stdout if stdout else sys.stdout
-        self.client =  self.make_client(client_class if client_class else EDACloudClient)
+        self.client =  self.make_client()
 
-    def make_client(self, client_class):
-        client = client_class(self.server_hostname, self.server_portnumber, self.username)
+    def make_client(self):
+        client = EDACloudClient(self.server_hostname, self.server_portnumber, self.username)
         client.build_event_status_handler = self.async_build_event_status_handler
         return client
    

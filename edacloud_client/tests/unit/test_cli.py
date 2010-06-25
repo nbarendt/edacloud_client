@@ -10,8 +10,7 @@ class CLIApplication(object):
         self.stdout_buffer = StringIO()
         self.async_buffer = StringIO()
         self.cmd = edacloud_client.cli.EDACloudCLI(stdout=self.stdout_buffer,
-                                                   asyncout=self.async_buffer,
-                                                   client_class=Mock(spec=edacloud_client.client.EDACloudClient))
+                                                   asyncout=self.async_buffer)
         self.mock_client = self.cmd.client
 
     @property
@@ -72,10 +71,13 @@ class ClientFunctionMock(object):
     
 class CLITestCase(TestCase):
     def setUp(self):
+        self.original = edacloud_client.cli.EDACloudClient
+        edacloud_client.cli.EDACloudClient = Mock(return_value=Mock(spec=self.original))
         self.application = CLIApplication()
 
     def tearDown(self):
         self.application = None
+        edacloud_client.cli.EDACloudClient = self.original
 
     def test_ClientWillReturnEmptyProjectList(self):
         self.application.client('get_project_list').will_return([])
