@@ -59,10 +59,10 @@ class ClientFunctionMock(object):
     def __init__(self, func):
         self.func = func
 
-    def returns(self, value):
+    def will_return(self, value):
         setattr(self.func, 'return_value', value)
 
-    def has_side_effect(self, value):
+    def will_cause_side_effect(self, value):
         setattr(self.func, 'side_effect', value)
 
     def was_called_with(self, expected):
@@ -77,11 +77,11 @@ class CLITestCase(TestCase):
         self.application = None
 
     def test_ClientWillReturnEmptyProjectList(self):
-        self.application.client('get_project_list').returns([])
+        self.application.client('get_project_list').will_return([])
         self.application.get_project_list().shows('Projects:\n\n')
 
     def test_ClientWillReturnNonEmptyProjectList(self):
-        self.application.client('get_project_list').returns( [ {'path': 'a', 'id': '12'},
+        self.application.client('get_project_list').will_return( [ {'path': 'a', 'id': '12'},
                                                                {'path': 'b', 'id': '34'},
                                                                {'path': 'c', 'id': '56'}
                                                                ])
@@ -99,7 +99,7 @@ class CLITestCase(TestCase):
 
     def test_ClientWillErrorOnInvalidProjectID(self):
         PROJECT_ID = 'abcdefg'
-        self.application.client('build_project').has_side_effect(edacloud_client.cli.BuildException(
+        self.application.client('build_project').will_cause_side_effect(edacloud_client.cli.BuildException(
             'Unknown Project ID', PROJECT_ID))
         self.application.build_project(PROJECT_ID).shows(
             'Error Building Project: Unknown Project ID %s\n' % PROJECT_ID)
@@ -118,7 +118,7 @@ class CLITestCase(TestCase):
     def test_ClientWillDownloadBuildResults(self):
         BUILD_ID = 'abcdefg'
         DOWNLOAD_DIR = 'c:\quidgybo\download_build'
-        self.application.client('get_build_results').returns(DOWNLOAD_DIR)
+        self.application.client('get_build_results').will_return(DOWNLOAD_DIR)
         self.application.get_build_results(BUILD_ID, DOWNLOAD_DIR).shows(
             'Build {0} results available in {1}\n'.format(BUILD_ID, DOWNLOAD_DIR))
 
