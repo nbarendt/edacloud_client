@@ -113,12 +113,24 @@ class CLITestCase(TestCase):
         build = dict(started=started_date_time)
         status = dict(message='Complete')
         self.application.force_async_build_event_status(project, build, status)
-        self.application.async_shows('Build Status: Complete for build started at {0}'.format(started_date_time))
+        self.application.async_shows('Build Status: Complete for build started at {0}\n'.format(started_date_time))
 
     def test_ClientWillDownloadBuildResults(self):
         BUILD_ID = 'abcdefg'
         DOWNLOAD_DIR = 'c:\quidgybo\download_build'
         self.application.client('get_build_results').returns(DOWNLOAD_DIR)
         self.application.get_build_results(BUILD_ID, DOWNLOAD_DIR).shows(
-            'Build {0} results available in {1}'.format(BUILD_ID, DOWNLOAD_DIR))
-        self.application.client('get_build_results').was_called_with([ ((BUILD_ID, DOWNLOAD_DIR), {} )])
+            'Build {0} results available in {1}\n'.format(BUILD_ID, DOWNLOAD_DIR))
+
+    def test_ClientErrorOnBuildIDWithEmbeddedSpaces(self):
+        BUILD_ID = 'abcd efg'
+        DOWNLOAD_DIR = 'c:\quidgybo\download_build'
+        self.application.get_build_results(BUILD_ID, DOWNLOAD_DIR).shows(
+            'Error parsing "get {0} {1}"\n'.format(BUILD_ID, DOWNLOAD_DIR))
+
+    def test_ClientErrorOnDownloadDirWithEmbeddedSpaces(self):
+        BUILD_ID = 'abcdefg'
+        DOWNLOAD_DIR = 'c:\qui dgybo\download_build'
+        self.application.get_build_results(BUILD_ID, DOWNLOAD_DIR).shows(
+            'Error parsing "get {0} {1}"\n'.format(BUILD_ID, DOWNLOAD_DIR))
+
