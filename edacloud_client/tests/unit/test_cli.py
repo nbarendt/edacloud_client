@@ -9,8 +9,7 @@ class CLIApplication(object):
     def __init__(self):
         self.stdout_buffer = StringIO()
         self.async_buffer = StringIO()
-        self.cmd = edacloud_client.cli.EDACloudCLI(stdout=self.stdout_buffer,
-                                                   asyncout=self.async_buffer)
+        self.cmd = edacloud_client.cli.EDACloudCLI(stdout=self.stdout_buffer, asyncout=self.async_buffer)
         self.mock_client = self.cmd.client
 
     @property

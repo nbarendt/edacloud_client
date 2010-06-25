@@ -14,6 +14,6 @@ if __name__ == '__main__':
     suite = unittest.defaultTestLoader.discover(start_dir=os.getcwd())
     cov = coverage.coverage()
     cov.start()
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    unittest.TextTestRunner().run(suite)
     cov.stop()
     #cov.report(omit_prefixes=[site_packages_path])

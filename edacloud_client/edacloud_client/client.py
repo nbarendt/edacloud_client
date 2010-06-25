@@ -25,29 +25,13 @@ def make_request(method, url, data=''):
 
 class EDACloudClient(object):
     def __init__(self, hostname, portnumber, username):
-        raise Exception('SHOULD BE MOCKED!')
-        self.server_hostname = hostname
-        self.server_portnumber = portnumber
-        self.username = username
-        self.build_event_status_handler = None
-
-    def get_user(self, path):
-        url = 'http://{0}:{1}/{2}/{3}'.format(self.server_hostname, self.server_portnumber, self.username, path)
-        return make_request('GET', url)
-
-    def post_user_json(self, path, data):
-        url = 'http://{0}:{1}/{2}/{3}'.format(self.server_hostname, self.server_portnumber, self.username, path)
-        return make_request('POST', url, json.dumps(data))
+        pass
 
     def get_project_list(self):
-        try:
-            return json.loads(self.get_user('projects').read())
-        except ValueError:
-            return []
-
+        pass
+    
     def add_project(self, project_path):
-        self.post_user_json('projects', dict(path=project_path.strip())).read()
-        return
+        pass
 
     def build_project(self, project_id):
         pass
