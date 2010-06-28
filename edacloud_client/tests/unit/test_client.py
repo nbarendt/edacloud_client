@@ -2,21 +2,8 @@ from unittest2 import TestCase
 import edacloud_client.client
 import edacloud_client.service
 from mock import Mock
+from test_utils import MockFunctionHelper
 
-
-class FunctionMock(object):
-    def __init__(self, func):
-        self.func = func
-
-    def will_return(self, value):
-        setattr(self.func, 'return_value', value)
-
-    def will_cause_side_effect(self, value):
-        setattr(self.func, 'side_effect', value)
-
-    def was_called_with(self, expected):
-        actual = getattr(self.func, 'call_args_list')
-        assert expected == actual, 'Expected %s but actual %s' % (expected, actual)
 
 class ClientTestCase(TestCase):
     def setUp(self):
@@ -29,7 +16,7 @@ class ClientTestCase(TestCase):
         edacloud_client.client.EDACloudService = self.original
 
     def service(self, attr):
-        return FunctionMock(getattr(self.mock_service, attr))
+        return MockFunctionHelper(getattr(self.mock_service, attr))
 
     def test_ClientWillCreateServiceObject(self):
         self.assertIsNotNone(self.client.service)

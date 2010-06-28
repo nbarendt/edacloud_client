@@ -4,6 +4,7 @@ import edacloud_client.cli
 import edacloud_client.client
 from StringIO import StringIO
 from datetime import datetime
+from test_utils import MockFunctionHelper
 
 class CLIApplication(object):
     def __init__(self):
@@ -52,21 +53,7 @@ class CLIApplication(object):
         self.mock_client.build_event_status_handler(project, build, status)
 
     def client(self, attr):
-        return ClientFunctionMock(getattr(self.mock_client, attr))
-
-class ClientFunctionMock(object):
-    def __init__(self, func):
-        self.func = func
-
-    def will_return(self, value):
-        setattr(self.func, 'return_value', value)
-
-    def will_cause_side_effect(self, value):
-        setattr(self.func, 'side_effect', value)
-
-    def was_called_with(self, expected):
-        actual = getattr(self.func, 'call_args_list')
-        assert expected == actual 
+        return MockFunctionHelper(getattr(self.mock_client, attr))
     
 class CLITestCase(TestCase):
     def setUp(self):
