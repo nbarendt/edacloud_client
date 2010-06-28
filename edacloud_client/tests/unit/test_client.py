@@ -49,7 +49,7 @@ class ClientTestCase(TestCase):
         self.assertEqual(proj, self.client.get_project_by_ID('testID'))
 
     def test_ClientWillAddNewProject(self):
-        self.service('create_new_project').will_return(edacloud_client.client.Project())
+        self.service('create_new_project').will_return(Mock(spec=edacloud_client.client.Project))
         project_path = 'testproject'
         self.client.add_project(project_path)
         self.service('create_new_project').was_called_with([((project_path,), {})])
