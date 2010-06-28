@@ -1,5 +1,6 @@
 from unittest2 import TestCase
 import edacloud_client.client
+import edacloud_client.service
 from mock import Mock
 
 
@@ -43,18 +44,18 @@ class ClientTestCase(TestCase):
         self.assertRaises(edacloud_client.client.BadProjectID, self.client.get_project_by_ID, project_id=None)
 
     def test_ClientWillReturnProjectOnGetProjectByID(self):
-        proj = edacloud_client.client.Project()
+        proj = edacloud_client.service.Project()
         self.service('get_project_by_ID').will_return(proj)
         self.assertEqual(proj, self.client.get_project_by_ID('testID'))
 
     def test_ClientWillAddNewProject(self):
-        self.service('create_new_project').will_return(Mock(spec=edacloud_client.client.Project))
+        self.service('create_new_project').will_return(Mock(spec=edacloud_client.service.Project))
         project_path = 'testproject'
         self.client.add_project(project_path)
         self.service('create_new_project').was_called_with([((project_path,), {})])
 
     def test_ClientWillBuildProject(self):
-        build = edacloud_client.client.Build()
+        build = edacloud_client.service.Build()
         self.service('build_project').will_return(build)
         self.assertEqual(build, self.client.build_project('testproject'))
        
@@ -65,7 +66,7 @@ class ClientTestCase(TestCase):
     def test_ClientWillGetBuildResults(self):
         build_id = 'aaa'
         target_dir = 'bbb'
-        build = Mock(spec=edacloud_client.client.Build)
+        build = Mock(spec=edacloud_client.service.Build)
         build.save_results_to_local_path.return_value = target_dir
         self.service('get_build_by_ID').will_return(build)
         self.assertEqual(target_dir, self.client.get_build_results(build_id, target_dir))
