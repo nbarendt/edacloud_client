@@ -1,4 +1,10 @@
 from edacloud_client.exceptions import *
+class Project(object):
+    pass
+
+class Build(object):
+    def save_results_to_local_path(self, path):
+        pass
 
 class EDACloudService(object):
     def get_all_projects(self):
@@ -16,12 +22,6 @@ class EDACloudService(object):
     def get_build_by_ID(self, build_id):
         pass
     
-class Project(object):
-    pass
-
-class Build(object):
-    def save_results_to_local_path(self, path):
-        pass
 
 class EDACloudClient(object):
     def __init__(self):

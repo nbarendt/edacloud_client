@@ -17,7 +17,6 @@ class FunctionMock(object):
         actual = getattr(self.func, 'call_args_list')
         assert expected == actual, 'Expected %s but actual %s' % (expected, actual)
 
-
 class ClientTestCase(TestCase):
     def setUp(self):
         self.original = edacloud_client.client.EDACloudService
