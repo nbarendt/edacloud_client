@@ -99,8 +99,8 @@ class CLITestCase(TestCase):
 
     def test_CLIWillErrorOnInvalidProjectID(self):
         PROJECT_ID = 'abcdefg'
-        self.application.client('build_project').will_cause_side_effect(edacloud_client.cli.BuildException(
-            'Unknown Project ID', PROJECT_ID))
+        self.application.client('build_project').will_cause_side_effect(edacloud_client.cli.BadProjectID(
+            PROJECT_ID))
         self.application.build_project(PROJECT_ID).shows(
             'Error Building Project: Unknown Project ID %s\n' % PROJECT_ID)
 
@@ -121,6 +121,12 @@ class CLITestCase(TestCase):
         self.application.client('get_build_results').will_return(DOWNLOAD_DIR)
         self.application.get_build_results(BUILD_ID, DOWNLOAD_DIR).shows(
             'Build {0} results available in {1}\n'.format(BUILD_ID, DOWNLOAD_DIR))
+
+    def test_CLIWillErrorOnInvalidBuildIDOnDownloadBuildResults(self):
+        exc = edacloud_client.cli.BadBuildID('bad_id')
+        self.application.client('get_build_results').will_cause_side_effect(exc)
+        self.application.get_build_results('build_id', 'target_dir').shows(
+            'Error Retrieving Results:  Unknown Build ID bad_id\n')
 
     def test_CLIErrorOnBuildIDWithEmbeddedSpaces(self):
         BUILD_ID = 'abcd efg'

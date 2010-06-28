@@ -2,11 +2,8 @@
 from cmd import Cmd
 import sys
 from edacloud_client.client import EDACloudClient
+from edacloud_client.exceptions import *
 
-class BuildException(Exception):
-    def __init__(self, details, project_id):
-        self.details = details
-        self.project_id = project_id
 
 class EDACloudCLI(Cmd):
     prompt = 'edacloud> '
@@ -47,9 +44,11 @@ class EDACloudCLI(Cmd):
         try:
             self.client.build_project(args)
             self.stdout.write('\n')
+        except BadProjectID, e:
+            self.stdout.write('Error Building Project: Unknown Project ID {0}\n'.format(e.project_id))
         except BuildException, e:
-                self.stdout.write('Error Building Project: %s %s\n' % (e.details, e.project_id))
-
+            self.stdout.write('Error Building Project: %s %s\n' % (e.details, e.project_id))
+                              
     def do_get(self, args):
         args_list = args.split()
         if len(args_list) != 2:
@@ -57,8 +56,11 @@ class EDACloudCLI(Cmd):
             return
         build_id = args_list[0]
         target_dir = args_list[1]
-        results = self.client.get_build_results(build_id, target_dir)
-        self.stdout.write('Build {0} results available in {1}\n'.format(build_id, results))
+        try:
+            results = self.client.get_build_results(build_id, target_dir)
+            self.stdout.write('Build {0} results available in {1}\n'.format(build_id, results))
+        except BadBuildID, e:
+            self.stdout.write('Error Retrieving Results:  Unknown Build ID {0}\n'.format(e.build_id))
         
 if __name__ == '__main__':
     cli = EDACloudCLIClient()
