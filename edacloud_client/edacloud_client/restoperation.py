@@ -26,6 +26,8 @@ class RESTOperation(object):
         self.method = method
         self.parse_url(url)
         self.request_data = data
+        self.encode_request = None
+        self.decode_response = None
 
     def parse_url(self, url):
         self.scheme, self.netloc, self.path, params, self.query, fragment = urlparse(url)
@@ -51,14 +53,15 @@ class RESTOperation(object):
             raise HTTPError(self.result.status, self.result.reason)
         self.response = self.result.read()
         self.decode_response_data()
-        
+
+    def decode_response_data(self):
+        pass
+    
     def execute(self):
         self.make_connection()
         self.make_request()
         self.get_response()
 
-    def decode_response_data(self):
-        pass
 
     
 class RESTService(object):

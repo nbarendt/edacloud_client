@@ -40,36 +40,42 @@ class RESTOperationHTTPBehaviorTestCase(TestCase):
         self.original = edacloud_client.restoperation.HTTPConnection
         self.mock_HTTPConnection = Mock(spec=self.original)
         edacloud_client.restoperation.HTTPConnection = self.mock_HTTPConnection
-
+        self.service = RESTService(HOSTNAME, PORT, dict(username=USER))
+        
     def tearDown(self):
         edacloud_client.restoperation.HTTPConnection = self.original
 
-    def force_http_status(self, status, reason):
+    def force_http_status(self, status, reason, response=''):
         request_mock = self.mock_HTTPConnection()
         request_mock.getresponse.return_value = Mock()
         request_mock.getresponse.return_value.status = status
         request_mock.getresponse.return_value.reason = reason
+        request_mock.getresponse.return_value.read = lambda : response
         
     def test_OperationRaisesExceptionOnHTTPStatus500(self):
         self.force_http_status( 500, 'Forced Failure')
-        service = RESTService(HOSTNAME, PORT, dict(username=USER))
-        op =  service.get('http://{0}/'.format(HOSTNAME))
+        op = self.service.get('http://{0}/'.format(HOSTNAME))
         self.assertRaises( HTTPError, op.execute)
 
     def test_OperationUsesGet(self):
         self.force_http_status( 200, 'Success')
-        service = RESTService(HOSTNAME, PORT, dict(username=USER))
-        op =  service.get('http://{0}/'.format(HOSTNAME))
+        op = self.service.get('http://{0}/'.format(HOSTNAME))
         op.execute()
         self.mock_HTTPConnection().request.assert_called_with('GET', '/', '')
         
     def test_OperationSendsRequestData(self):
         self.force_http_status( 200, 'Success')
-        service = RESTService(HOSTNAME, PORT, dict(username=USER))
         test_data = 'abcdef'
-        op =  service.get('http://{0}/'.format(HOSTNAME), test_data)
+        op = self.service.get('http://{0}/'.format(HOSTNAME), test_data)
         op.execute()
         self.mock_HTTPConnection().request.assert_called_with('GET', '/', test_data)       
+
+    def test_OperationReturnsResponseData(self):
+        response = 'sample response data'
+        self.force_http_status( 200, 'Success', response)
+        op = self.service.get('http://{0}/'.format(HOSTNAME), )
+        op.execute()
+        self.assertEqual( response, op.response)
          
 class RESTOperationLiveServerTestCase(TestCase):
     def setUp(self):
