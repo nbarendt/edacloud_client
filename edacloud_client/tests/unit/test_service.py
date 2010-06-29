@@ -10,15 +10,6 @@ HOSTNAME = 'hostname.com'
 PORT = 8080
 
 class ServiceInitTestCase(TestCase):
-    def est_ServiceWillGetAPIVersionLink(self):
-        HTTP_BASE = 'http://{0}:{1}'.format(HOSTNAME, PORT)
-        versions_list = [ { VERSION : {'href' : '/'.join([HTTP_BASE, API_BASE, VERSION])}, }, ]
-        EDACloudService.make_request = mocksignature(EDACloudService.make_request)
-        EDACloudService.make_request.mock.return_value =  { 'links' : { 'versions' : versions_list }, }
-        service = EDACloudService(HOSTNAME, PORT, USER)
-        service.make_request.mock.assert_called_with(service, 'GET', '/'.join([HTTP_BASE, API_BASE]), '')
-        self.assertEqual('/'.join([HTTP_BASE, API_BASE, VERSION]), service.api_version_url)
-        
     def test_ServiceWillGetUserLink(self):
         HTTP_BASE = 'http://{0}:{1}'.format(HOSTNAME, PORT)
         versions_list = [ { VERSION : {'href' : '/'.join([HTTP_BASE, API_BASE, VERSION])}, }, ]
