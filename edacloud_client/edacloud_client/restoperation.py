@@ -6,13 +6,14 @@ from edacloud_client.exceptions import UnsupportedURLScheme, HTTPError
 DEFAULT_HTTP_PORT = '80'
 
 class RESTOperation(object):
-    def __init__(self, service, method, url, data=''):
+    def __init__(self, service, method, url, data='', headers={}):
         self.service = service
         self.method = method
         self.parse_url(url)
         self.request_data = data
         self.encode_request = None
         self.decode_response = None
+        self.headers = headers
 
     def parse_url(self, url):
         self.scheme, self.netloc, self.path, params, self.query, fragment = urlparse(url)
@@ -29,7 +30,8 @@ class RESTOperation(object):
         return data
     
     def make_request(self):
-        self.connection.request(self.method, self.path, self.encode_request_data(self.request_data))
+        encoded_data = self.encode_request_data(self.request_data)
+        self.connection.request(self.method, self.path, encoded_data, self.headers)
 
     def get_response(self):
         self.result = self.connection.getresponse()
@@ -39,9 +41,13 @@ class RESTOperation(object):
 
     def decode_response_data(self, data):
         return data
+
+    def prepare_for_request(self):
+        pass
     
     def execute(self):
         self.make_connection()
+        self.prepare_for_request()
         self.make_request()
         self.get_response()
 
@@ -59,8 +65,8 @@ class RESTService(object):
         self.port = port
         self.credentials = credentials
 
-    def get(self, url, data=''):
-        return self.operation_class(self, 'GET', url, data)
+    def get(self, url, data='', headers={}):
+        return self.operation_class(self, 'GET', url, data, headers)
 
 class JSONRESTService(RESTService):
     operation_class = JSONRESTOperation

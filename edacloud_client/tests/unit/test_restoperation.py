@@ -1,7 +1,7 @@
 from unittest2 import TestCase
 from edacloud_client.restoperation import RESTService, JSONRESTService
 from edacloud_client.exceptions import UnsupportedURLScheme, HTTPError
-from mock import Mock, patch
+from mock import Mock, patch, mocksignature
 import edacloud_client.restoperation
 
 HOSTNAME = 'hostname.com'
@@ -58,14 +58,14 @@ class RESTOperationHTTPBehaviorTestCase(TestCase):
         self.force_http_status( 200, 'Success')
         op = self.service.get(self.test_url)
         op.execute()
-        self.mock_HTTPConnection().request.assert_called_with('GET', '/', '')
+        self.mock_HTTPConnection().request.assert_called_with('GET', '/', '', {})
         
     def test_OperationSendsRequestData(self):
         self.force_http_status( 200, 'Success')
         test_data = 'abcdef'
         op = self.service.get(self.test_url, test_data)
         op.execute()
-        self.mock_HTTPConnection().request.assert_called_with('GET', '/', test_data)       
+        self.mock_HTTPConnection().request.assert_called_with('GET', '/', test_data, {})       
 
     def test_OperationReturnsResponseData(self):
         response = 'sample response data'
@@ -73,6 +73,13 @@ class RESTOperationHTTPBehaviorTestCase(TestCase):
         op = self.service.get(self.test_url, )
         op.execute()
         self.assertEqual( response, op.response)
+
+    def test_OperationCallsPrepareForRequest(self):
+        self.force_http_status( 200, 'Success')
+        op = self.service.get(self.test_url)
+        op.prepare_for_request = mocksignature(op.prepare_for_request)
+        op.execute()
+        self.assertTrue(op.prepare_for_request.mock.called)
 
 class JSONRESTOperationEncodeDecodeTestCase(TestCase):
     test_url = 'http://{0}/'.format(HOSTNAME)
@@ -99,7 +106,7 @@ class JSONRESTOperationEncodeDecodeTestCase(TestCase):
         self.force_http_status(200, 'Success')
         op = self.service.get(self.test_url, self.test_data)
         op.execute()
-        self.mock_HTTPConnection().request.assert_called_with('GET', '/', self.test_data_str)
+        self.mock_HTTPConnection().request.assert_called_with('GET', '/', self.test_data_str, {})
         
     def test_WillDecodeResponseDataAsJSON(self):
         self.force_http_status(200, 'Success', self.test_data_str)
