@@ -1,16 +1,17 @@
 from unittest2 import TestCase
-from edacloud_client.restoperation import RESTService, UnsupportedScheme, HTTPError, JSONRESTService
+from edacloud_client.restoperation import RESTService, JSONRESTService
+from edacloud_client.exceptions import UnsupportedURLScheme, HTTPError
 from mock import Mock, patch
 import edacloud_client.restoperation
 
 HOSTNAME = 'hostname.com'
 PORT = 8080
 USER = 'nobody'
-    
+
 class RESTOperationURLParsingTestCase(TestCase):
     def test_ServiceOperationWillRaiseExceptionOnUnsupportedScheme(self):
         service = RESTService(HOSTNAME, PORT, dict(username=USER))
-        self.assertRaises( UnsupportedScheme, service.get, 'ftp://')
+        self.assertRaises( UnsupportedURLScheme, service.get, 'ftp://')
 
     def test_OperationWillParseHostnameAndPortFromURLWithoutExplicitPort(self):
         service = RESTService(HOSTNAME, PORT, dict(username=USER))

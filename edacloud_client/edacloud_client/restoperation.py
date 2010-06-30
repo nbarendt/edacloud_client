@@ -1,23 +1,9 @@
 from httplib import HTTPConnection
 import json
 from urlparse import urlparse
+from edacloud_client.exceptions import UnsupportedURLScheme, HTTPError
 
 DEFAULT_HTTP_PORT = '80'
-
-class UnsupportedScheme(Exception):
-    def __init__(self, unsupported_scheme):
-        self.scheme = unsupported_scheme
-
-    def __str__(self):
-        return 'Unsupported Scheme: {0}'.format(self.scheme)
-
-class HTTPError(Exception):
-    def __init__(self, status, reason):
-        self.status = status
-        self.reason = reason
-
-    def __str__(self):
-        return 'HTTP Server Returned {0} : {1}'.format(self.status, self.reason)
 
 class RESTOperation(object):
     def __init__(self, service, method, url, data=''):
@@ -31,7 +17,7 @@ class RESTOperation(object):
     def parse_url(self, url):
         self.scheme, self.netloc, self.path, params, self.query, fragment = urlparse(url)
         if self.scheme != 'http':
-            raise UnsupportedScheme(self.scheme)
+            raise UnsupportedURLScheme(self.scheme)
         if ':' not in self.netloc:
             self.netloc = ':'.join([self.netloc, DEFAULT_HTTP_PORT])
 

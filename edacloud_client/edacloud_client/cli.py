@@ -45,7 +45,7 @@ class EDACloudCLI(Cmd):
             self.client.build_project(args)
             self.stdout.write('\n')
         except BadProjectID, e:
-            self.stdout.write('Error Building Project: Unknown Project ID {0}\n'.format(e.project_id))
+            self.stdout.write('Error Building Project: Unknown Project ID {0}\n'.format(e.id))
         except BuildException, e:
             self.stdout.write('Error Building Project: %s %s\n' % (e.details, e.project_id))
                               
@@ -60,7 +60,7 @@ class EDACloudCLI(Cmd):
             results = self.client.get_build_results(build_id, target_dir)
             self.stdout.write('Build {0} results available in {1}\n'.format(build_id, results))
         except BadBuildID, e:
-            self.stdout.write('Error Retrieving Results:  Unknown Build ID {0}\n'.format(e.build_id))
+            self.stdout.write('Error Retrieving Results:  Unknown Build ID {0}\n'.format(e.id))
         
 if __name__ == '__main__':
     cli = EDACloudCLIClient()

@@ -1,17 +1,28 @@
+class UnsupportedURLScheme(Exception):
+    def __init__(self, unsupported_scheme):
+        self.scheme = unsupported_scheme
+
+    def __str__(self):
+        return 'Unsupported Scheme: {0}'.format(self.scheme)
+
+class HTTPError(Exception):
+    def __init__(self, status, reason):
+        self.status = status
+        self.reason = reason
+
+    def __str__(self):
+        return 'HTTP Server Returned {0} : {1}'.format(self.status, self.reason)
 
 class BadProjectID(Exception):
-    def __init__(self, project_id):
-        self.project_id = project_id
+    id_type = 'Project'
+    def __init__(self, id):
+        self.id = id
 
     def __str__(self):
-        return 'Bad Project ID: {0}'.format(self.project_id)
+        return 'Bad {0} ID: {1}'.format(self.id_type, self.id)
 
-class BadBuildID(Exception):
-    def __init__(self, build_id):
-        self.build_id = build_id
-
-    def __str__(self):
-        return 'Bad Build ID: {0}'.format(self.build_id)
+class BadBuildID(BadProjectID):
+    id_type = 'Build'
 
 class BuildException(Exception):
     def __init__(self, project_id, build_id, details):
