@@ -1,7 +1,6 @@
 from unittest2 import TestCase
-from edacloud_client.restoperation import RESTService, UnsupportedScheme, HTTPError
+from edacloud_client.restoperation import RESTService, UnsupportedScheme, HTTPError, JSONRESTService
 from mock import Mock, patch
-from test_utils import HttpTestServer, SimpleGETHTTPRequestHandler
 import edacloud_client.restoperation
 
 API_BASE = 'api'
@@ -36,6 +35,7 @@ class RESTOperationURLParsingTestCase(TestCase):
         self.assertEqual(expected_qs, op.query)
 
 class RESTOperationHTTPBehaviorTestCase(TestCase):
+    test_url = 'http://{0}/'.format(HOSTNAME)
     def setUp(self):
         self.original = edacloud_client.restoperation.HTTPConnection
         self.mock_HTTPConnection = Mock(spec=self.original)
@@ -54,47 +54,61 @@ class RESTOperationHTTPBehaviorTestCase(TestCase):
         
     def test_OperationRaisesExceptionOnHTTPStatus500(self):
         self.force_http_status( 500, 'Forced Failure')
-        op = self.service.get('http://{0}/'.format(HOSTNAME))
+        op = self.service.get(self.test_url)
         self.assertRaises( HTTPError, op.execute)
 
     def test_OperationUsesGet(self):
         self.force_http_status( 200, 'Success')
-        op = self.service.get('http://{0}/'.format(HOSTNAME))
+        op = self.service.get(self.test_url)
         op.execute()
         self.mock_HTTPConnection().request.assert_called_with('GET', '/', '')
         
     def test_OperationSendsRequestData(self):
         self.force_http_status( 200, 'Success')
         test_data = 'abcdef'
-        op = self.service.get('http://{0}/'.format(HOSTNAME), test_data)
+        op = self.service.get(self.test_url, test_data)
         op.execute()
         self.mock_HTTPConnection().request.assert_called_with('GET', '/', test_data)       
 
     def test_OperationReturnsResponseData(self):
         response = 'sample response data'
         self.force_http_status( 200, 'Success', response)
-        op = self.service.get('http://{0}/'.format(HOSTNAME), )
+        op = self.service.get(self.test_url, )
         op.execute()
         self.assertEqual( response, op.response)
-         
-class RESTOperationLiveServerTestCase(TestCase):
+
+class JSONRESTOperationEncodeDecodeTestCase(TestCase):
+    test_url = 'http://{0}/'.format(HOSTNAME)
+    test_data = { 'hello' : 'world', 'a' : [1,2,3] }
+    test_data_str =  '{"a": [1, 2, 3], "hello": "world"}'
+
     def setUp(self):
-        self.fake_server = HttpTestServer()
-        self.fake_server.start()
-
+        self.original = edacloud_client.restoperation.HTTPConnection
+        self.mock_HTTPConnection = Mock(spec=self.original)
+        edacloud_client.restoperation.HTTPConnection = self.mock_HTTPConnection
+        self.service = JSONRESTService(HOSTNAME, PORT, dict(username=USER))
+        
     def tearDown(self):
-        self.fake_server.stop()
+        edacloud_client.restoperation.HTTPConnection = self.original
 
-    def test_OperationWillDoHTTPOperation(self):
-        class TestHandler(SimpleGETHTTPRequestHandler):
-            resp = 'HelloWorld!'
-        self.fake_server.replace_request_handler_with(TestHandler)
-        service = RESTService(self.fake_server.hostname, self.fake_server.port, dict(username=USER))
-        op = service.get('http://{0}:{1}/'.format(service.hostname, service.port))
+    def force_http_status(self, status, reason, response=''):
+        request_mock = self.mock_HTTPConnection()
+        request_mock.getresponse.return_value = Mock()
+        request_mock.getresponse.return_value.status = status
+        request_mock.getresponse.return_value.reason = reason
+        request_mock.getresponse.return_value.read = lambda : response
+
+    def test_WillEncodeRequestDataAsJSON(self):
+        self.force_http_status(200, 'Success')
+        op = self.service.get(self.test_url, self.test_data)
         op.execute()
-        self.assertEqual(TestHandler.resp, op.response)
+        self.mock_HTTPConnection().request.assert_called_with('GET', '/', self.test_data_str)
+        
+    def test_WillDecodeResponseDataAsJSON(self):
+        self.force_http_status(200, 'Success', self.test_data_str)
+        op = self.service.get(self.test_url)
+        op.execute()
+        self.assertEqual(self.test_data, op.response)
 
 
-class JSONRESTOperationTestCase(TestCase):
-    def test_JSONRESTOperationWillEncodeDataToJSON(self):
-        pass
+

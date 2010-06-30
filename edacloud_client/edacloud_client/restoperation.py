@@ -40,30 +40,33 @@ class RESTOperation(object):
         hostname, port = self.netloc.split(':', 1)
         self.connection = HTTPConnection(hostname, port)
 
-    def encode_request_data(self):
-        pass
+    def encode_request_data(self, data):
+        return data
     
     def make_request(self):
-        self.encode_request_data()
-        self.connection.request(self.method, self.path, self.request_data)
+        self.connection.request(self.method, self.path, self.encode_request_data(self.request_data))
 
     def get_response(self):
         self.result = self.connection.getresponse()
         if self.result.status not in [200, 204]:
             raise HTTPError(self.result.status, self.result.reason)
-        self.response = self.result.read()
-        self.decode_response_data()
+        self.response = self.decode_response_data(self.result.read())
 
-    def decode_response_data(self):
-        pass
+    def decode_response_data(self, data):
+        return data
     
     def execute(self):
         self.make_connection()
         self.make_request()
         self.get_response()
 
+class JSONRESTOperation(RESTOperation):
+    def encode_request_data(self, data):
+        return json.dumps(data)
 
-    
+    def decode_response_data(self, data):
+        return json.loads(data) if data else None
+
 class RESTService(object):
     operation_class = RESTOperation
     def __init__(self, hostname, port, credentials):
@@ -74,30 +77,5 @@ class RESTService(object):
     def get(self, url, data=''):
         return self.operation_class(self, 'GET', url, data)
 
-
-class JSONRESTOperation(RESTOperation):
-    def encode_request_data(self):
-        pass
-
-    def decode_response_data(self):
-        pass
-    
-    
-class JSONRESTService(object):
+class JSONRESTService(RESTService):
     operation_class = JSONRESTOperation
-
-
-def make_request(method, url, data='', decodeJSONresult=False):
-        (scheme, netloc, path, params, query, fragment) = urlparse(url)
-        if scheme != 'http':
-            raise Exception('Unsupported URL scheme: %s' % scheme)
-        host, port = netloc.split(':', 1)
-        conn = HTTPConnection(host, port)
-        conn.request(method, path, data)
-        result = conn.getresponse()
-        if result.status not in [200,204]:
-            raise Exception('%s on %s returned status of %s with response body of %s' % (method, url, result.status, result.read()))
-        if decodeJSONresult:
-            result = result.read()
-            result = json.loads(result)
-        return result
