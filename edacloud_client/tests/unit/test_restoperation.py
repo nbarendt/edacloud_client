@@ -6,7 +6,6 @@ import edacloud_client.restoperation
 HOSTNAME = 'hostname.com'
 PORT = 8080
 USER = 'nobody'
-
     
 class RESTOperationURLParsingTestCase(TestCase):
     def test_ServiceOperationWillRaiseExceptionOnUnsupportedScheme(self):
