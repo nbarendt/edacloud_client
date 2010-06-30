@@ -3,12 +3,9 @@ from edacloud_client.restoperation import RESTService, UnsupportedScheme, HTTPEr
 from mock import Mock, patch
 import edacloud_client.restoperation
 
-API_BASE = 'api'
-VERSION = 'v2010-06-28'
-USER = 'nobody'
-
 HOSTNAME = 'hostname.com'
 PORT = 8080
+USER = 'nobody'
 
     
 class RESTOperationURLParsingTestCase(TestCase):

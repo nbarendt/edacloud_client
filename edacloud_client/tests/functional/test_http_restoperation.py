@@ -3,7 +3,9 @@ from edacloud_client.restoperation import RESTService
 from http_test_utils import HttpTestServer, SimpleGETHTTPRequestHandler
 import edacloud_client.restoperation
 
-         
+USER = 'nobody'
+
+
 class RESTOperationLiveServerTestCase(TestCase):
     def setUp(self):
         self.fake_server = HttpTestServer()

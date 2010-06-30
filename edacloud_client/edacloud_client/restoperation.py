@@ -18,7 +18,6 @@ class HTTPError(Exception):
 
     def __str__(self):
         return 'HTTP Server Returned {0} : {1}'.format(self.status, self.reason)
-    
 
 class RESTOperation(object):
     def __init__(self, service, method, url, data=''):
