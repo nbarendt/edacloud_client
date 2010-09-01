@@ -10,7 +10,8 @@ class UnsupportedURLSchemeTestCase(TestCase):
         self.assertEqual(self.bad_scheme, self.exc.scheme)
 
     def test_CanGetStringRepresentation(self):
-        self.assertEqual('Unsupported Scheme: {0}'.format(self.bad_scheme), str(self.exc))
+        self.assertEqual('Unsupported Scheme: {0}'.format(self.bad_scheme),
+            str(self.exc))
 
 class HTTPErrorTestCase(TestCase):
     status = 500
@@ -23,7 +24,8 @@ class HTTPErrorTestCase(TestCase):
         self.assertEqual(self.reason, self.exc.reason)
 
     def test_CanGetStringRepresentation(self):
-        self.assertEqual('HTTP Server Returned {0} : {1}'.format(self.status, self.reason), str(self.exc))
+        self.assertEqual('HTTP Server Returned {0} : {1}'.format(self.status,
+            self.reason), str(self.exc))
 
 class BadProjectIDTestCase(TestCase):
     bad_id = '1'
@@ -36,7 +38,8 @@ class BadProjectIDTestCase(TestCase):
         self.assertEqual(self.bad_id, self.exc.id)
 
     def test_CanGetStringRepresentation(self):
-        self.assertEqual('Bad {0} ID: {1}'.format(self.id_type, self.bad_id), str(self.exc))
+        self.assertEqual('Bad {0} ID: {1}'.format(self.id_type, self.bad_id),
+            str(self.exc))
 
 class BadBuildIDTestCase(TestCase):
     id_exc_class = BadBuildID
@@ -55,8 +58,9 @@ class BuildExceptionTestCase(TestCase):
         self.assertEqual(self.details, self.exc.details)
 
     def test_CanGetStringRepresentation(self):
-        self.assertEqual('Build Exception on Build {0} for Project {1}: {2}'.format(
-            self.project_id,
-            self.build_id,
-            self.details),
-                         str(self.exc))
+        self.assertEqual('Build Exception on Build {0} for Project {1}: {2}'.\
+            format(
+             self.project_id,
+             self.build_id,
+             self.details),
+            str(self.exc))

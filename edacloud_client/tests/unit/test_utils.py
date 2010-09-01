@@ -10,5 +10,7 @@ class MockFunctionHelper(object):
 
     def was_called_with(self, expected):
         actual = getattr(self.func, 'call_args_list')
-        assert expected == actual, 'Expected %s but actual %s' % (expected, actual)
+        msg ='Expected %s but actual %s' % (expected, actual) 
+        assert expected == actual, msg
+             
 

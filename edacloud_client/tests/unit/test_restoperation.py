@@ -58,14 +58,16 @@ class RESTOperationHTTPBehaviorTestCase(TestCase):
         self.force_http_status( 200, 'Success')
         op = self.service.get(self.test_url)
         op.execute()
-        self.mock_HTTPConnection().request.assert_called_with('GET', '/', '', {})
+        self.mock_HTTPConnection().\
+            request.assert_called_with('GET', '/', '', {})
         
     def test_OperationSendsRequestData(self):
         self.force_http_status( 200, 'Success')
         test_data = 'abcdef'
         op = self.service.get(self.test_url, test_data)
         op.execute()
-        self.mock_HTTPConnection().request.assert_called_with('GET', '/', test_data, {})       
+        self.mock_HTTPConnection().\
+            request.assert_called_with('GET', '/', test_data, {})       
 
     def test_OperationReturnsResponseData(self):
         response = 'sample response data'
@@ -106,7 +108,8 @@ class JSONRESTOperationEncodeDecodeTestCase(TestCase):
         self.force_http_status(200, 'Success')
         op = self.service.get(self.test_url, self.test_data)
         op.execute()
-        self.mock_HTTPConnection().request.assert_called_with('GET', '/', self.test_data_str, {})
+        self.mock_HTTPConnection().\
+            request.assert_called_with('GET', '/', self.test_data_str, {})
         
     def test_WillDecodeResponseDataAsJSON(self):
         self.force_http_status(200, 'Success', self.test_data_str)

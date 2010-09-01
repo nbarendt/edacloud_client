@@ -8,7 +8,8 @@ from test_utils import MockFunctionHelper
 class ClientTestCase(TestCase):
     def setUp(self):
         self.original = edacloud_client.client.EDACloudService
-        edacloud_client.client.EDACloudService = Mock(return_value=Mock(spec=self.original))
+        edacloud_client.client.EDACloudService = Mock(
+            return_value=Mock(spec=self.original))
         self.client = edacloud_client.client.EDACloudClient()
         self.mock_service = self.client.service
         
@@ -28,7 +29,8 @@ class ClientTestCase(TestCase):
     def test_ClientWillRaiseExceptionOnGetProjectByIDWithBadID(self):
         self.service('get_project_by_ID').will_cause_side_effect(
             edacloud_client.client.BadProjectID('sample_bad_id'))
-        self.assertRaises(edacloud_client.client.BadProjectID, self.client.get_project_by_ID, project_id=None)
+        self.assertRaises(edacloud_client.client.BadProjectID,
+            self.client.get_project_by_ID, project_id=None)
 
     def test_ClientWillReturnProjectOnGetProjectByID(self):
         proj = edacloud_client.service.Project()
@@ -36,10 +38,12 @@ class ClientTestCase(TestCase):
         self.assertEqual(proj, self.client.get_project_by_ID('testID'))
 
     def test_ClientWillAddNewProject(self):
-        self.service('create_new_project').will_return(Mock(spec=edacloud_client.service.Project))
+        self.service('create_new_project').will_return(
+            Mock(spec=edacloud_client.service.Project))
         project_path = 'testproject'
         self.client.add_project(project_path)
-        self.service('create_new_project').was_called_with([((project_path,), {})])
+        self.service('create_new_project').was_called_with(
+            [((project_path,), {})])
 
     def test_ClientWillBuildProject(self):
         build = edacloud_client.service.Build()
@@ -47,8 +51,10 @@ class ClientTestCase(TestCase):
         self.assertEqual(build, self.client.build_project('testproject'))
        
     def test_ClientWillRaiseExceptionOnBuildProjectWithBadID(self):
-        self.service('build_project').will_cause_side_effect(edacloud_client.client.BadProjectID('sample_bad_id'))
-        self.assertRaises(edacloud_client.client.BadProjectID, self.client.build_project, project_id=None)
+        self.service('build_project').will_cause_side_effect(
+            edacloud_client.client.BadProjectID('sample_bad_id'))
+        self.assertRaises(edacloud_client.client.BadProjectID,
+            self.client.build_project, project_id=None)
 
     def test_ClientWillGetBuildResults(self):
         build_id = 'aaa'
@@ -56,6 +62,7 @@ class ClientTestCase(TestCase):
         build = Mock(spec=edacloud_client.service.Build)
         build.save_results_to_local_path.return_value = target_dir
         self.service('get_build_by_ID').will_return(build)
-        self.assertEqual(target_dir, self.client.get_build_results(build_id, target_dir))
+        self.assertEqual(target_dir,
+            self.client.get_build_results(build_id, target_dir))
         build.save_results_to_local_path.assert_called_with(target_dir)
 

@@ -10,7 +10,8 @@ class CLIApplication(object):
     def __init__(self):
         self.stdout_buffer = StringIO()
         self.async_buffer = StringIO()
-        self.cmd = edacloud_client.cli.EDACloudCLI(stdout=self.stdout_buffer, asyncout=self.async_buffer)
+        self.cmd = edacloud_client.cli.EDACloudCLI(stdout=self.stdout_buffer,
+            asyncout=self.async_buffer)
         self.mock_client = self.cmd.client
 
     @property
@@ -26,11 +27,13 @@ class CLIApplication(object):
         return self
 
     def shows(self, expected):
-        assert expected in self.display, 'Failed to find "%s" in "%s"' % (expected, self.display)
+        msg = 'Failed to find "%s" in "%s"' % (expected, self.display)
+        assert expected in self.display, msg
         return self
 
     def async_shows(self, expected):
-        assert expected in self.async_display, 'Failed to find "%s" in "%s"' % (expected, self.async_display)
+        msg = 'Failed to find "%s" in "%s"' % (expected, self.async_display)
+        assert expected in self.async_display, msg 
         return self
 
     def get_project_list(self):
@@ -58,7 +61,8 @@ class CLIApplication(object):
 class CLITestCase(TestCase):
     def setUp(self):
         self.original = edacloud_client.cli.EDACloudClient
-        edacloud_client.cli.EDACloudClient = Mock(return_value=Mock(spec=self.original))
+        edacloud_client.cli.EDACloudClient = Mock(return_value=Mock(
+            spec=self.original))
         self.application = CLIApplication()
 
     def tearDown(self):
@@ -86,13 +90,14 @@ class CLITestCase(TestCase):
 
     def test_CLIWillErrorOnInvalidProjectID(self):
         PROJECT_ID = 'abcdefg'
-        self.application.client('build_project').will_cause_side_effect(edacloud_client.cli.BadProjectID(
-            PROJECT_ID))
+        self.application.client('build_project').will_cause_side_effect(
+            edacloud_client.cli.BadProjectID(PROJECT_ID))
         self.application.build_project(PROJECT_ID).shows(
             'Error Building Project: Unknown Project ID %s\n' % PROJECT_ID)
 
     def test_CLIWillRegisterBuildStatusHandler(self):
-        self.assertIsNotNone(self.application.mock_client.build_event_status_handler)
+        self.assertIsNotNone(self.application.\
+            mock_client.build_event_status_handler)
 
     def test_CLIWillReportAsyncBuildStatusEvent(self):
         started_date_time = datetime.now().isoformat()
@@ -100,14 +105,17 @@ class CLITestCase(TestCase):
         build = dict(started=started_date_time)
         status = dict(message='Complete')
         self.application.force_async_build_event_status(project, build, status)
-        self.application.async_shows('Build Status: Complete for build started at {0}\n'.format(started_date_time))
+        self.application.async_shows(
+            'Build Status: Complete for build started at {0}\n'.format(
+                started_date_time))
 
     def test_CLIWillDownloadBuildResults(self):
         BUILD_ID = 'abcdefg'
         DOWNLOAD_DIR = 'c:\quidgybo\download_build'
         self.application.client('get_build_results').will_return(DOWNLOAD_DIR)
         self.application.get_build_results(BUILD_ID, DOWNLOAD_DIR).shows(
-            'Build {0} results available in {1}\n'.format(BUILD_ID, DOWNLOAD_DIR))
+            'Build {0} results available in {1}\n'.format(
+                BUILD_ID, DOWNLOAD_DIR))
 
     def test_CLIWillErrorOnInvalidBuildIDOnDownloadBuildResults(self):
         exc = edacloud_client.cli.BadBuildID('bad_id')
