@@ -17,8 +17,10 @@ class RESTOperationLiveServerTestCase(TestCase):
         class TestHandler(SimpleGETHTTPRequestHandler):
             resp = 'HelloWorld!'
         self.fake_server.replace_request_handler_with(TestHandler)
-        service = RESTService(self.fake_server.hostname, self.fake_server.port, dict(username=USER))
-        op = service.get('http://{0}:{1}/'.format(service.hostname, service.port))
+        service = RESTService(self.fake_server.hostname,
+            self.fake_server.port, dict(username=USER))
+        op = service.get('http://{0}:{1}/'.format(
+            service.hostname, service.port))
         op.execute()
         self.assertEqual(TestHandler.resp, op.response)
 
@@ -29,12 +31,17 @@ class RESTOperationLiveServerTestCase(TestCase):
                 self.send_response(200)
                 self.end_headers()
                 special_keys = [k for k in self.headers if k.startswith('x-')]
-                resp = '/n'.join(['{0} {1}'.format(x, self.headers[x]) for x in special_keys])
+                resp = '/n'.join(['{0} {1}'.format(
+                    x, self.headers[x]) for x in special_keys])
                 self.wfile.write(resp)
                 return
         self.fake_server.replace_request_handler_with(TestHandler)
-        service = RESTService(self.fake_server.hostname, self.fake_server.port, dict(username=USER))
-        op = service.get('http://{0}:{1}/'.format(service.hostname, service.port), '', expected_headers)
+        service = RESTService(self.fake_server.hostname,
+            self.fake_server.port, dict(username=USER))
+        op = service.get('http://{0}:{1}/'.format(service.hostname,
+            service.port), '', expected_headers)
         op.execute()
-        expected_response = '/n'.join(['{0} {1}'.format(x, expected_headers[x]) for x in expected_headers])
+        expected_response = '/n'.join(
+            ['{0} {1}'.format(x, expected_headers[x]) 
+                for x in expected_headers])
         self.assertEqual(expected_response, op.response)

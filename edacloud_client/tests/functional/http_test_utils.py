@@ -3,7 +3,9 @@ from threading import Thread
 
 class HttpTestServer(object):
     def __init__(self):
-        self.httpd_server = BaseHTTPServer.HTTPServer(('localhost', 0), BaseHTTPServer.BaseHTTPRequestHandler)
+        req_handler = BaseHTTPServer.BaseHTTPRequestHandler
+        self.httpd_server = BaseHTTPServer.HTTPServer(('localhost', 0),
+            req_handler) 
         self.server_thread = Thread(target=self.httpd_server.serve_forever)
         self.server_thread.daemon = True
 
