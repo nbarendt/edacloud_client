@@ -3,8 +3,12 @@ from edacloud_client.service import EDACloudService
 
 
 class EDACloudClient(object):
+    hostname = ''
+    port = 0
+    user = ''
+
     def __init__(self):
-        self.service = EDACloudService()
+        self.service = EDACloudService(self.hostname, self.port, self.user)
 
     def get_project_list(self):
         return self.service.get_all_projects()

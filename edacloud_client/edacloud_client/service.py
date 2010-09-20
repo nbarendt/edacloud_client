@@ -1,3 +1,5 @@
+from urlparse import urljoin
+
 class Project(object):
     pass
 
@@ -16,16 +18,17 @@ class EDACloudService(object):
         self.api_version_url = self.get_api_version_url()
         self.user_url = self.get_user_url()
         
-    def filter_api_versions(self, desired_version, versions_list):
+    def find_required_api_version(self, desired_version, versions_list):
         for ver in versions_list:
             if desired_version in ver:
                 return ver[desired_version]['href']
-        raise Exception('Unable to locate required API version')
     
     def get_api_version_url(self):
-        api_url = '/'.join(['http://{0}:{1}'.format(self.hostname, self.portnumber), self.base_api_path])
+        base_url = 'http://{0}:{1}'.format(self.hostname, self.portnumber)
+        api_url = urljoin(base_url, self.base_api_path)
         results = self.make_request('GET', api_url)
-        return self.filter_api_versions(self.api_version, results['links']['versions'])
+        versions = results['links']['versions']
+        return self.find_required_api_version(self.api_version, versions) 
 
     def get_user_url(self):
         results = self.make_request('GET', self.api_version_url)

@@ -6,10 +6,15 @@ from test_utils import MockFunctionHelper
 
 
 class ClientTestCase(TestCase):
+    default_server_params = dict(hostname='quidgybo', port=123, user='nobody')
+
     def setUp(self):
         self.original = edacloud_client.client.EDACloudService
         edacloud_client.client.EDACloudService = Mock(
             return_value=Mock(spec=self.original))
+        for k in self.default_server_params.keys():
+            setattr(edacloud_client.client.EDACloudClient,
+                k, self.default_server_params[k])
         self.client = edacloud_client.client.EDACloudClient()
         self.mock_service = self.client.service
         
@@ -21,6 +26,17 @@ class ClientTestCase(TestCase):
 
     def test_ClientWillCreateServiceObject(self):
         self.assertIsNotNone(self.client.service)
+
+    def test_ClientWillCreateServiceObjectWithDefaultParams(self):
+        expected = [
+            ( (
+                self.default_server_params['hostname'],
+                self.default_server_params['port'],
+                self.default_server_params['user']
+                ), {} ),
+            ]
+        self.assertEqual( expected, 
+            edacloud_client.client.EDACloudService.call_args_list)
 
     def test_ClientWillReturnEmptyProjectsList(self):
         self.service('get_all_projects').will_return([])
