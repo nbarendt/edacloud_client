@@ -61,7 +61,10 @@ class EDACloudCLI(Cmd):
             self.stdout.write('Build {0} results available in {1}\n'.format(build_id, results))
         except BadBuildID, e:
             self.stdout.write('Error Retrieving Results:  Unknown Build ID {0}\n'.format(e.id))
-        
+
+def main():
+    cli = EDACloudCLI()
+    cli.cmdloop()    
+
 if __name__ == '__main__':
-    cli = EDACloudCLIClient()
-    cli.cmdloop()
+	main()    

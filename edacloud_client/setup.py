@@ -19,8 +19,14 @@ setup(name='edacloud_client',
       zip_safe=False,
       install_requires=[
           # -*- Extra requirements: -*-
+	"coverage==3.4b1",
+	"mock==0.7.0b2",
+	"unittest2==0.5.1",
+	"distribute>=0.6.10",
       ],
-      entry_points="""
-      # -*- Entry points: -*-
-      """,
+      entry_points={
+	'console_scripts' : [
+		'cli = edacloud_client.cli:main',
+	]
+      },
       )
