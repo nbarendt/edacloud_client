@@ -11,6 +11,8 @@ class EDACloudCLI(Cmd):
     def __init__(self, completekey='tab', stdin=None, stdout=None, asyncout=None, client_class=None):
         Cmd.__init__(self, completekey, stdin, stdout)
         self.asyncout = asyncout if asyncout else stdout if stdout else sys.stdout
+	self.stdout = stdout if stdout else  sys.stdout
+	self.stderr = sys.stderr
         self._client =  None
 
     @property
