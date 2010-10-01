@@ -27,6 +27,7 @@ setup(name='edacloud_client',
       entry_points={
 	'console_scripts' : [
 		'cli = edacloud_client.cli:main',
+		'test_cli = edacloud_client.cli:test_main',
 	]
       },
       )
