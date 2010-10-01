@@ -74,6 +74,7 @@ class TestCLI(EDACloudCLI):
         self.stdout.write("OK\n")
         self.stdout.flush()
 	self.stderr.flush()
+	return stop
 
 def test_main():
     cli = TestCLI()
