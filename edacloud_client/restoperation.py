@@ -16,7 +16,8 @@ class RESTOperation(object):
         self.headers = headers
 
     def parse_url(self, url):
-        self.scheme, self.netloc, self.path, params, self.query, fragment = urlparse(url)
+        self.scheme, self.netloc, self.path, params, self.query, fragment =\
+            urlparse(url)
         if self.scheme != 'http':
             raise UnsupportedURLScheme(self.scheme)
         if ':' not in self.netloc:
@@ -31,7 +32,8 @@ class RESTOperation(object):
     
     def make_request(self):
         encoded_data = self.encode_request_data(self.request_data)
-        self.connection.request(self.method, self.path, encoded_data, self.headers)
+        self.connection.request(self.method, self.path, encoded_data,
+            self.headers)
 
     def get_response(self):
         self.result = self.connection.getresponse()
@@ -60,9 +62,7 @@ class JSONRESTOperation(RESTOperation):
 
 class RESTService(object):
     operation_class = RESTOperation
-    def __init__(self, hostname, port, credentials):
-        self.hostname = hostname
-        self.port = port
+    def __init__(self, credentials):
         self.credentials = credentials
 
     def get(self, url, data='', headers={}):
