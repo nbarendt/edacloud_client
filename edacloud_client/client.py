@@ -6,6 +6,9 @@ class EDACloudClient(object):
     def __init__(self, hostname, port, user):
         self.service = EDACloudService(hostname, port, user)
 
+    def ping_server(self):
+        return self.service.ping_server()
+
     def get_project_list(self):
         return self.service.get_all_projects()
 

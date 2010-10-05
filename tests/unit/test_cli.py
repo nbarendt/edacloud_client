@@ -54,6 +54,10 @@ class CLIApplication(object):
     def get_build_results(self, build_id, results_dir):
         self.issue_command('get {0} {1}'.format(build_id, results_dir))
         return self
+
+    def ping(self):
+        self.issue_command('ping')
+        return self
     
     def force_async_build_event_status(self, project, build, status):
         self.mock_client.build_event_status_handler(project, build, status)
