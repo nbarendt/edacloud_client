@@ -10,23 +10,23 @@ USER = 'nobody'
 
 class RESTOperationURLParsingTestCase(TestCase):
     def test_ServiceOperationWillRaiseExceptionOnUnsupportedScheme(self):
-        service = RESTService(dict(username=USER))
+        service = RESTService()
         self.assertRaises( UnsupportedURLScheme, service.get, 'ftp://')
 
     def test_OperationWillParseHostnameAndPortFromURLWithoutExplicitPort(self):
-        service = RESTService(dict(username=USER))
+        service = RESTService()
         op = service.get('http://{0}'.format(HOSTNAME))
         expected_netloc = '{0}:{1}'.format(HOSTNAME, 80)
         self.assertEqual(expected_netloc, op.netloc)
 
     def test_OperationWillParsePath(self):
-        service = RESTService(dict(username=USER))
+        service = RESTService()
         expected_path = '/index'
         op = service.get('http://{0}{1}'.format(HOSTNAME, expected_path))
         self.assertEqual(expected_path, op.path)
 
     def test_OperationWillParseQueryString(self):
-        service = RESTService(dict(username=USER))
+        service = RESTService()
         expected_qs = 'hello=world&goodbye=world'
         op = service.get('http://{0}/?{1}'.format(HOSTNAME, expected_qs))
         self.assertEqual(expected_qs, op.query)
@@ -37,7 +37,7 @@ class RESTOperationHTTPBehaviorTestCase(TestCase):
         self.original = edacloud_client.restoperation.HTTPConnection
         self.mock_HTTPConnection = Mock(spec=self.original)
         edacloud_client.restoperation.HTTPConnection = self.mock_HTTPConnection
-        self.service = RESTService(dict(username=USER))
+        self.service = RESTService()
         
     def tearDown(self):
         edacloud_client.restoperation.HTTPConnection = self.original
@@ -92,7 +92,7 @@ class JSONRESTOperationEncodeDecodeTestCase(TestCase):
         self.original = edacloud_client.restoperation.HTTPConnection
         self.mock_HTTPConnection = Mock(spec=self.original)
         edacloud_client.restoperation.HTTPConnection = self.mock_HTTPConnection
-        self.service = JSONRESTService(dict(username=USER))
+        self.service = JSONRESTService()
         
     def tearDown(self):
         edacloud_client.restoperation.HTTPConnection = self.original

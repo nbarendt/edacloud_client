@@ -17,7 +17,7 @@ class RESTOperationLiveServerTestCase(TestCase):
         class TestHandler(SimpleGETHTTPRequestHandler):
             resp = 'HelloWorld!'
         self.fake_server.replace_request_handler_with(TestHandler)
-        service = RESTService(dict(username=USER))
+        service = RESTService()
         op = service.get('http://{0}:{1}/'.format(
             self.fake_server.hostname, self.fake_server.port))
         op.execute()
@@ -35,7 +35,7 @@ class RESTOperationLiveServerTestCase(TestCase):
                 self.wfile.write(resp)
                 return
         self.fake_server.replace_request_handler_with(TestHandler)
-        service = RESTService(dict(username=USER))
+        service = RESTService()
         op = service.get('http://{0}:{1}/'.format(self.fake_server.hostname,
             self.fake_server.port), '', expected_headers)
         op.execute()

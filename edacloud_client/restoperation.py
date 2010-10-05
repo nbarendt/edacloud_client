@@ -62,8 +62,8 @@ class JSONRESTOperation(RESTOperation):
 
 class RESTService(object):
     operation_class = RESTOperation
-    def __init__(self, credentials):
-        self.credentials = credentials
+    def __init__(self):
+        pass
 
     def get(self, url, data='', headers={}):
         return self.operation_class(self, 'GET', url, data, headers)
