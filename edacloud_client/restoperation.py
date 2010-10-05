@@ -6,8 +6,7 @@ from edacloud_client.exceptions import UnsupportedURLScheme, HTTPError
 DEFAULT_HTTP_PORT = '80'
 
 class RESTOperation(object):
-    def __init__(self, service, method, url, data='', headers={}):
-        self.service = service
+    def __init__(self, method, url, data='', headers={}):
         self.method = method
         self.parse_url(url)
         self.request_data = data
@@ -60,13 +59,3 @@ class JSONRESTOperation(RESTOperation):
     def decode_response_data(self, data):
         return json.loads(data) if data else None
 
-class RESTService(object):
-    operation_class = RESTOperation
-    def __init__(self):
-        pass
-
-    def get(self, url, data='', headers={}):
-        return self.operation_class(self, 'GET', url, data, headers)
-
-class JSONRESTService(RESTService):
-    operation_class = JSONRESTOperation

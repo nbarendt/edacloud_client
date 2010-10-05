@@ -32,9 +32,8 @@ class EDACloudService(object):
     @property
     def api_version_url(self):
         if not self._api_version_url:
-            base_url = 'http://{0}:{1}'.format(self.hostname, self.port)
-            api_url = urljoin(base_url, self.base_api_path)
-            results = self.make_request('GET', api_url)
+            api_url = self.synthesize_entry_point_url()
+            results = self.make_json_request('GET', api_url) 
             versions = results['links']['versions']
             self._api_version_url = self.find_required_api_version(
                 self.api_version, versions) 
@@ -43,15 +42,19 @@ class EDACloudService(object):
     @property
     def user_url(self):
         if not self._user_url:
-            results = self.make_request('GET', self.api_version_url)
+            results = self.make_json_request('GET', self.api_version_url)
             self._user_url = results['links'][self.username]['href']
         return self._user_url
+
+    def synthesize_url_entry_point(self):
+        base_url = 'http://{0}:{1}'.format(self.hostname, self.port)
+        return urljoin(base_url, self.base_api_path)
 
     def ping_server(self):
         pass
         
-    def make_request(self, method, url, data=''):
-        self.user_url
+    def make_json_request(self, method, url, data=''):
+        
         return None
  
     def get_all_projects(self):
