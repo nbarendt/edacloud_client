@@ -2,6 +2,7 @@ from unittest2 import TestCase
 from mock import Mock, patch
 import edacloud_client.cli
 import edacloud_client.client
+from edacloud_client.service import PingResult
 from StringIO import StringIO
 from datetime import datetime
 from test_utils import MockFunctionHelper
@@ -10,7 +11,9 @@ class CLIApplication(object):
     def __init__(self):
         self.stdout_buffer = StringIO()
         self.async_buffer = StringIO()
-        self.cmd = edacloud_client.cli.EDACloudCLI(stdout=self.stdout_buffer,
+        self.cmd = edacloud_client.cli.EDACloudCLI(
+            edacloud_client.cli.get_options([])[0],
+            stdout=self.stdout_buffer,
             asyncout=self.async_buffer)
         self.mock_client = self.cmd.client
 
@@ -68,6 +71,21 @@ class CLITestCase(TestCase):
     def tearDown(self):
         self.application = None
         edacloud_client.cli.EDACloudClient = self.original
+
+    def test_CLIWillPingServer(self):
+        ping_result = PingResult(True, 'localhost', 1234)
+        self.application.client('ping_server').will_return(ping_result)
+        self.application.ping().shows('OK')
+
+    def test_CLIServerPingResultsIncludeHostnameAndPort(self):
+        ping_result = PingResult(True, 'localhost', 1234)
+        self.application.client('ping_server').will_return(ping_result)
+        self.application.ping().shows('(localhost:1234)')
+
+    def test_CLIWillDisplayErrorOnPingWithCommunicationErrorsToServer(self):
+        ping_result = PingResult(False, None, None)
+        self.application.client('ping_server').will_return(ping_result)
+        self.application.ping().shows('Error communicating with server\n')
 
     def test_CLIWillReturnEmptyProjectList(self):
         self.application.client('get_project_list').will_return([])
@@ -135,3 +153,37 @@ class CLITestCase(TestCase):
         self.application.get_build_results(BUILD_ID, DOWNLOAD_DIR).shows(
             'Error parsing "get {0} {1}"\n'.format(BUILD_ID, DOWNLOAD_DIR))
 
+class TestCLIOptions(TestCase):
+    def setUp(self):
+        self.original = edacloud_client.cli.EDACloudClient
+        edacloud_client.cli.EDACloudClient = Mock(return_value=Mock(
+            spec=self.original))
+
+    def tearDown(self):
+        edacloud_client.cli.EDACloudClient = self.original
+
+    def test_CLIUsesHostName(self):
+        opts, args = edacloud_client.cli.get_options(['--host', 'localhost',
+                    '-p', '8080'])
+        cli = edacloud_client.cli.EDACloudCLI(opts)
+        cli.client
+        edacloud_client.cli.EDACloudClient.assert_called_with(
+            'localhost', 8080, 'user')
+
+class TestOptionParsing(TestCase):
+    def parse_options(self, args=None):
+        return edacloud_client.cli.get_options(args)[0]
+        
+    def test_UsesDefaultHostname(self):
+        self.assertEqual('api.edacloud.com', self.parse_options().hostname)
+
+    def test_UsesHostnameProvided(self):
+        argv = ['--host', 'localhost']
+        self.assertEqual('localhost', self.parse_options(argv).hostname) 
+    
+    def test_usesDefaultPort(self):
+        self.assertEqual(80, self.parse_options().port)
+
+    def test_UsesPortProvided(self):
+        argv = ['-p', '8080']
+        self.assertEqual(8080, self.parse_options(argv).port) 

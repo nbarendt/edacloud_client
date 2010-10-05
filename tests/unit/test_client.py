@@ -12,10 +12,10 @@ class ClientTestCase(TestCase):
         self.original = edacloud_client.client.EDACloudService
         edacloud_client.client.EDACloudService = Mock(
             return_value=Mock(spec=self.original))
-        for k in self.default_server_params.keys():
-            setattr(edacloud_client.client.EDACloudClient,
-                k, self.default_server_params[k])
-        self.client = edacloud_client.client.EDACloudClient()
+        self.client = edacloud_client.client.EDACloudClient(
+            self.default_server_params['hostname'],
+            self.default_server_params['port'],
+            self.default_server_params['user'])
         self.mock_service = self.client.service
         
     def tearDown(self):

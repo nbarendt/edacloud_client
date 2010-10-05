@@ -7,36 +7,53 @@ class Build(object):
     def save_results_to_local_path(self, path):
         pass
 
+class PingResult(object):
+    def __init__(self, success, hostname, port):
+        self.success = success
+        self.hostname = hostname
+        self.port = port
+
 class EDACloudService(object):
     base_api_path = 'api'
     api_version = 'v2010-06-28'
     
-    def __init__(self, hostname, portnumber, username):
+    def __init__(self, hostname, port, username):
         self.hostname = hostname
-        self.portnumber = portnumber
+        self.port = port
         self.username = username
-        self.api_version_url = self.get_api_version_url()
-        self.user_url = self.get_user_url()
+        self._api_version_url = None
+        self._user_url = None
         
     def find_required_api_version(self, desired_version, versions_list):
         for ver in versions_list:
             if desired_version in ver:
                 return ver[desired_version]['href']
     
-    def get_api_version_url(self):
-        base_url = 'http://{0}:{1}'.format(self.hostname, self.portnumber)
-        api_url = urljoin(base_url, self.base_api_path)
-        results = self.make_request('GET', api_url)
-        versions = results['links']['versions']
-        return self.find_required_api_version(self.api_version, versions) 
+    @property
+    def api_version_url(self):
+        if not self._api_version_url:
+            base_url = 'http://{0}:{1}'.format(self.hostname, self.port)
+            api_url = urljoin(base_url, self.base_api_path)
+            results = self.make_request('GET', api_url)
+            versions = results['links']['versions']
+            self._api_version_url = self.find_required_api_version(
+                self.api_version, versions) 
+        return self._api_version_url
 
-    def get_user_url(self):
-        results = self.make_request('GET', self.api_version_url)
-        return results['links'][self.username]['href']
+    @property
+    def user_url(self):
+        if not self._user_url:
+            results = self.make_request('GET', self.api_version_url)
+            self._user_url = results['links'][self.username]['href']
+        return self._user_url
+
+    def ping_server(self):
+        pass
         
     def make_request(self, method, url, data=''):
-        pass
-    
+        self.user_url
+        return None
+ 
     def get_all_projects(self):
         pass
 

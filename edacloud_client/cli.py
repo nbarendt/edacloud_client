@@ -3,17 +3,20 @@ from cmd import Cmd
 import sys
 from edacloud_client.client import EDACloudClient
 from edacloud_client.exceptions import *
+from optparse import OptionParser
 
 
 class EDACloudCLI(Cmd):
     prompt = 'edacloud> '
 
-    def __init__(self, completekey='tab', stdin=None, stdout=None, asyncout=None, client_class=None):
+    def __init__(self, options, completekey='tab', stdin=None, stdout=None,
+                asyncout=None, client_class=None) :
         Cmd.__init__(self, completekey, stdin, stdout)
         self.asyncout = asyncout if asyncout else stdout if stdout else sys.stdout
-	self.stdout = stdout if stdout else  sys.stdout
-	self.stderr = sys.stderr
+        self.stdout = stdout if stdout else  sys.stdout
+        self.stderr = sys.stderr
         self._client =  None
+        self.options = options
 
     @property
     def client(self):
@@ -21,7 +24,7 @@ class EDACloudCLI(Cmd):
 	return self._client
 
     def make_client(self):
-        client = EDACloudClient()
+        client=EDACloudClient(self.options.hostname, self.options.port, 'user')
         client.build_event_status_handler = self.async_build_event_status_handler
         return client
    
@@ -69,6 +72,23 @@ class EDACloudCLI(Cmd):
         except BadBuildID, e:
             self.stdout.write('Error Retrieving Results:  Unknown Build ID {0}\n'.format(e.id))
 
+    def do_ping(self, args):
+        result = self.client.ping_server()
+        if result.success:
+            self.stdout.write('OK ({0}:{1})\n'.format(result.hostname,
+                result.port))
+        else:
+            self.stdout.write('Error communicating with server\n')
+
+def get_options(args=None):
+    args = args or sys.argv[1:]
+    parser = OptionParser()
+    parser.add_option('--host', dest='hostname',
+                        help='server hostname', default='api.edacloud.com') 
+    parser.add_option('-p', '--port', dest='port', type="int",
+                        help='server port number', default=80)
+    return parser.parse_args(args)
+
 class TestCLI(EDACloudCLI):
     def postcmd(self, stop, line):
         self.stdout.write("OK\n")
@@ -77,14 +97,14 @@ class TestCLI(EDACloudCLI):
 	return stop
 
 def test_main():
-    cli = TestCLI()
+    cli = TestCLI(get_options()[0])
     try:
         cli.cmdloop()
     except  IOError:
         pass
 
 def main():
-    cli = EDACloudCLI()
+    cli = EDACloudCLI(get_options()[0])
     cli.cmdloop()    
 
 if __name__ == '__main__':
