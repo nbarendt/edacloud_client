@@ -1,4 +1,5 @@
 from urlparse import urljoin
+from edacloud_client.restoperation import JSONRESTOperation
 
 class Project(object):
     pass
@@ -33,8 +34,8 @@ class EDACloudService(object):
     def api_version_url(self):
         if not self._api_version_url:
             api_url = self.synthesize_entry_point_url()
-            results = self.make_json_request('GET', api_url) 
-            versions = results['links']['versions']
+            response = self.make_json_request('GET', api_url) 
+            versions = response.data['links']['versions']
             self._api_version_url = self.find_required_api_version(
                 self.api_version, versions) 
         return self._api_version_url
@@ -42,20 +43,26 @@ class EDACloudService(object):
     @property
     def user_url(self):
         if not self._user_url:
-            results = self.make_json_request('GET', self.api_version_url)
-            self._user_url = results['links'][self.username]['href']
+            response = self.make_json_request('GET', self.api_version_url)
+            self._user_url = response.data['links'][self.username]['href']
         return self._user_url
 
-    def synthesize_url_entry_point(self):
+    def synthesize_entry_point_url(self):
         base_url = 'http://{0}:{1}'.format(self.hostname, self.port)
         return urljoin(base_url, self.base_api_path)
 
     def ping_server(self):
-        pass
-        
+        url = self.synthesize_entry_point_url()    
+        response = self.make_json_request('GET', url)
+        ping_result = PingResult(response.result.status == 200,
+            self.hostname, self.port)
+        return ping_result 
+
     def make_json_request(self, method, url, data=''):
-        
-        return None
+        headers = {'Accept' : 'application/json'}
+        op = JSONRESTOperation(method, url, data, headers)
+        op.execute()
+        return  op
  
     def get_all_projects(self):
         pass
